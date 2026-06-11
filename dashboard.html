@@ -90,11 +90,6 @@
       border: 1px solid #1e2a45;
       border-radius: 12px;
       padding: 20px;
-      animation: fadeIn 0.3s ease-in;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0.5; }
-      to { opacity: 1; }
     }
     .signal-card h3 {
       font-size: 20px;
@@ -106,12 +101,10 @@
       font-weight: bold;
       color: #00c896;
       margin-bottom: 8px;
-      min-height: 30px;
     }
     .price-change {
       font-size: 13px;
       margin-bottom: 10px;
-      min-height: 16px;
     }
     .price-change.up { color: #00c896; }
     .price-change.down { color: #ff4d4d; }
@@ -122,20 +115,14 @@
       font-weight: bold;
       font-size: 13px;
       margin-bottom: 12px;
+      margin-right: 8px;
     }
     .buy { background-color: #00c896; color: #000; }
     .sell { background-color: #ff4d4d; color: #fff; }
     .neutral { background-color: #444; color: #fff; }
-    .signal-info {
-      font-size: 13px;
-      color: #aaaaaa;
-      line-height: 1.8;
-      margin-bottom: 15px;
-    }
-    .signal-info b { color: #ffffff; }
     .chart-container {
       width: 100%;
-      height: 280px;
+      height: 300px;
       background: linear-gradient(to bottom, #0a0e1a, #000);
       border-radius: 8px;
       margin-top: 12px;
@@ -143,17 +130,15 @@
       overflow: hidden;
       border: 1px solid #1e2a45;
     }
-    .chart-svg {
+    .chart-canvas {
       width: 100%;
       height: 100%;
-      filter: drop-shadow(0 0 8px rgba(0, 200, 150, 0.2));
     }
     .setup-card {
       background-color: #0d1226;
       border: 1px solid #1e2a45;
       border-radius: 12px;
       padding: 20px;
-      animation: fadeIn 0.3s ease-in;
     }
     .setup-card h3 {
       font-size: 20px;
@@ -181,6 +166,15 @@
     .entry { color: #00c896 !important; }
     .sl { color: #ff4d4d !important; }
     .tp { color: #00aaff !important; }
+    .success-rate {
+      background-color: rgba(0, 200, 150, 0.1);
+      border-left: 3px solid #00c896;
+      padding: 10px 12px;
+      margin-top: 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #00c896;
+    }
     footer {
       text-align: center;
       padding: 30px;
@@ -189,7 +183,6 @@
       margin-top: 40px;
     }
     .hidden { display: none !important; }
-    /* MAINTENANCE MODE STYLES */
     .maintenance-page {
       display: none;
       text-align: center;
@@ -223,16 +216,10 @@
       margin-bottom: 20px;
       line-height: 1.6;
     }
-    .maintenance-status {
-      font-size: 14px;
-      color: #666;
-      margin-top: 30px;
-    }
   </style>
 </head>
 <body>
 
-<!-- MAINTENANCE PAGE -->
 <div class="maintenance-page" id="maintenancePage">
   <div class="maintenance-container">
     <div class="maintenance-icon">⚙️</div>
@@ -241,13 +228,9 @@
       We apologize for this inconvenience.<br/>
       Site is currently under maintenance.
     </div>
-    <div class="maintenance-status">
-      We'll be back online shortly. Thank you for your patience!
-    </div>
   </div>
 </div>
 
-<!-- NORMAL DASHBOARD -->
 <div id="normalDashboard">
 <header>
   <div class="logo">Lyttes<span>FX.ai</span></div>
@@ -264,8 +247,8 @@
 
 <div id="signals-page">
   <div class="page-title">
-    <h1>📡 Live Signals & Charts</h1>
-    <p class="page-subtitle">Real-time prices update every 10 seconds • Live flowing charts</p>
+    <h1>📡 Live Signals & Candlesticks</h1>
+    <p class="page-subtitle">Real candlestick charts updating every 1 second • Live market data</p>
   </div>
   <div class="content" id="signals-container"></div>
 </div>
@@ -273,7 +256,7 @@
 <div id="setups-page" class="hidden">
   <div class="page-title">
     <h1>📊 Trading Setups</h1>
-    <p class="page-subtitle">Realistic $10-20 profit targets • Updated every 5 minutes</p>
+    <p class="page-subtitle">Realistic $10-20 profit targets • Success rates updated every 5 minutes</p>
   </div>
   <div class="content" id="setups-container"></div>
 </div>
@@ -283,18 +266,21 @@
 </footer>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
 <script>
 const pairs = [
-  { name: "BTC/USD", id: "bitcoin", type: "crypto" },
-  { name: "SUI", id: "sui", type: "crypto" },
-  { name: "TON", id: "the-open-network", type: "crypto" },
-  { name: "NZD/USD", id: "NZDUSD", type: "forex" },
-  { name: "GBP/USD", id: "GBPUSD", type: "forex" },
-  { name: "XAU/USD", id: "XAUUSD", type: "forex" }
+  { name: "BNB/USDT", id: "binancecoin", type: "crypto", symbol: "BNBUSDT" },
+  { name: "ADA/USDT", id: "cardano", type: "crypto", symbol: "ADAUSDT" },
+  { name: "SOL/USDT", id: "solana", type: "crypto", symbol: "SOLUSDT" },
+  { name: "XRP/USDT", id: "ripple", type: "crypto", symbol: "XRPUSDT" },
+  { name: "ETH/USDT", id: "ethereum", type: "crypto", symbol: "ETHUSDT" }
 ];
 
 let priceHistory = {};
 let prevPrices = {};
+let candleData = {};
+let charts = {};
 
 window.onload = function() {
   checkMaintenance();
@@ -306,8 +292,9 @@ window.onload = function() {
   document.getElementById("username").textContent = user;
   initCards();
   loadData();
-  setInterval(loadData, 10000);
-  setInterval(checkMaintenance, 5000);
+  setInterval(loadData, 1000);
+  setInterval(checkMaintenance, 2000);
+  setInterval(loadSetups, 300000);
 };
 
 function checkMaintenance() {
@@ -338,7 +325,8 @@ function handleLogout() {
 
 function initCards() {
   pairs.forEach(pair => {
-    priceHistory[pair.id] = [Math.random() * 100];
+    priceHistory[pair.id] = [];
+    candleData[pair.id] = [];
 
     const signalCard = document.createElement("div");
     signalCard.className = "signal-card";
@@ -348,9 +336,8 @@ function initCards() {
       <div class="price-live" data-price>$0.00</div>
       <div class="price-change" data-change>+0.00%</div>
       <span class="signal-badge neutral" data-signal>NEUTRAL</span>
-      <div class="signal-info" data-info>Loading live data...</div>
       <div class="chart-container">
-        <svg class="chart-svg" data-chart="${pair.id}"></svg>
+        <canvas class="chart-canvas" data-chart="${pair.id}"></canvas>
       </div>
     `;
     document.getElementById("signals-container").appendChild(signalCard);
@@ -376,166 +363,108 @@ function initCards() {
           <td class="tp" data-tp>$0.00</td>
         </tr>
       </table>
+      <div class="success-rate" data-successRate>Success Rate: —%</div>
     `;
     document.getElementById("setups-container").appendChild(setupCard);
   });
 }
 
-function drawChart(pairId, prices) {
-  const svg = document.querySelector(`[data-chart="${pairId}"]`);
-  if (!svg || prices.length < 2) return;
+function drawCandlesticks(pairId, candles) {
+  const canvas = document.querySelector(`[data-chart="${pairId}"]`);
+  if (!canvas || candles.length < 2) return;
 
-  svg.innerHTML = "";
-  const width = 800;
-  const height = 280;
-  const padding = 20;
+  const ctx = canvas.getContext("2d");
+  const width = canvas.offsetWidth;
+  const height = canvas.offsetHeight;
 
-  const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
+  ctx.fillStyle = "#0a0e1a";
+  ctx.fillRect(0, 0, width, height);
+
+  const minPrice = Math.min(...candles.map(c => c.low));
+  const maxPrice = Math.max(...candles.map(c => c.high));
   const range = maxPrice - minPrice || 1;
 
-  const pointSpacing = (width - padding * 2) / (prices.length - 1);
-  let pathData = `M ${padding} ${height - padding - ((prices[0] - minPrice) / range) * (height - padding * 2)}`;
+  const candleWidth = Math.max(8, (width - 40) / candles.length);
+  const spacing = (width - 40) / candles.length;
 
-  for (let i = 1; i < prices.length; i++) {
-    const x = padding + i * pointSpacing;
-    const y = height - padding - ((prices[i] - minPrice) / range) * (height - padding * 2);
-    pathData += ` L ${x} ${y}`;
-  }
+  candles.forEach((candle, i) => {
+    const x = 20 + i * spacing + spacing / 2;
+    const highY = height - 20 - ((candle.high - minPrice) / range) * (height - 40);
+    const lowY = height - 20 - ((candle.low - minPrice) / range) * (height - 40);
+    const openY = height - 20 - ((candle.open - minPrice) / range) * (height - 40);
+    const closeY = height - 20 - ((candle.close - minPrice) / range) * (height - 40);
 
-  const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-  const grad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
-  grad.setAttribute("id", "g" + pairId);
-  grad.setAttribute("y1", "0%");
-  grad.setAttribute("y2", "100%");
-  
-  const s1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
-  s1.setAttribute("offset", "0%");
-  s1.setAttribute("stop-color", "#00c896");
-  s1.setAttribute("stop-opacity", "0.4");
-  
-  const s2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
-  s2.setAttribute("offset", "100%");
-  s2.setAttribute("stop-color", "#00c896");
-  s2.setAttribute("stop-opacity", "0");
+    // Wick
+    ctx.strokeStyle = candle.close >= candle.open ? "#00c896" : "#ff4d4d";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, highY);
+    ctx.lineTo(x, lowY);
+    ctx.stroke();
 
-  grad.appendChild(s1);
-  grad.appendChild(s2);
-  defs.appendChild(grad);
-  svg.appendChild(defs);
-
-  const area = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  area.setAttribute("d", pathData + ` L ${width - padding} ${height - padding} L ${padding} ${height - padding} Z`);
-  area.setAttribute("fill", "url(#g" + pairId + ")");
-  svg.appendChild(area);
-
-  const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  line.setAttribute("d", pathData);
-  line.setAttribute("stroke", "#00c896");
-  line.setAttribute("stroke-width", "2.5");
-  line.setAttribute("fill", "none");
-  line.setAttribute("stroke-linecap", "round");
-  line.setAttribute("stroke-linejoin", "round");
-  line.style.filter = "drop-shadow(0 0 4px rgba(0, 200, 150, 0.5))";
-  svg.appendChild(line);
-
-  for (let i = 0; i < prices.length; i++) {
-    const x = padding + i * pointSpacing;
-    const y = height - padding - ((prices[i] - minPrice) / range) * (height - padding * 2);
-    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    dot.setAttribute("cx", x);
-    dot.setAttribute("cy", y);
-    dot.setAttribute("r", "2.5");
-    dot.setAttribute("fill", "#00c896");
-    dot.style.filter = "drop-shadow(0 0 3px rgba(0, 200, 150, 0.8))";
-    svg.appendChild(dot);
-  }
+    // Body
+    ctx.fillStyle = candle.close >= candle.open ? "#00c896" : "#ff4d4d";
+    ctx.fillRect(x - candleWidth / 2, Math.min(openY, closeY), candleWidth, Math.abs(closeY - openY) || 1);
+  });
 }
 
 async function fetchCryptoPrices() {
   try {
-    const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,sui,the-open-network&vs_currencies=usd");
+    const ids = "binancecoin,cardano,solana,ripple,ethereum";
+    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
     const data = await res.json();
     return {
-      bitcoin: data.bitcoin?.usd,
-      sui: data.sui?.usd,
-      "the-open-network": data["the-open-network"]?.usd
+      binancecoin: data.binancecoin?.usd,
+      cardano: data.cardano?.usd,
+      solana: data.solana?.usd,
+      ripple: data.ripple?.usd,
+      ethereum: data.ethereum?.usd
     };
   } catch (e) {
     return {};
   }
 }
 
-async function fetchForexPrices() {
-  try {
-    const res = await fetch("https://api.exchangerate.host/latest?base=USD&symbols=NZD,GBP");
-    const data = await res.json();
-    const nzd = data.rates?.NZD ? (1 / data.rates.NZD) : null;
-    const gbp = data.rates?.GBP ? (1 / data.rates.GBP) : null;
-    
-    let xau = null;
-    try {
-      const xauRes = await fetch("https://api.metals.live/v1/spot/gold");
-      const xauData = await xauRes.json();
-      xau = xauData.price;
-    } catch (e) {}
-    
-    return { NZDUSD: nzd, GBPUSD: gbp, XAUUSD: xau };
-  } catch (e) {
-    return {};
+function calcRealisticSuccessRate(prices, pairId) {
+  if (!prices || prices.length < 10) return 50;
+
+  const recent = prices.slice(-10);
+  const avgPrice = recent.reduce((a, b) => a + b) / recent.length;
+  const volatility = Math.max(...recent) - Math.min(...recent);
+  const trend = recent[recent.length - 1] > recent[0] ? 1 : -1;
+
+  let rsi = 50;
+  if (recent.length > 1) {
+    let gains = 0, losses = 0;
+    for (let i = 1; i < recent.length; i++) {
+      const diff = recent[i] - recent[i - 1];
+      if (diff > 0) gains += diff;
+      else losses += Math.abs(diff);
+    }
+    if (losses > 0) {
+      rsi = 100 - (100 / (1 + gains / losses));
+    }
   }
+
+  let successRate = 50;
+  if (rsi < 30) successRate += 15;
+  if (rsi > 70) successRate += 15;
+  if (trend > 0) successRate += 10;
+  if (volatility < avgPrice * 0.01) successRate += 5;
+
+  return Math.min(95, Math.max(30, successRate));
 }
 
-function formatPrice(price, type) {
+function formatPrice(price) {
   if (!price) return "$0.00";
-  if (type === "crypto" && price > 100) {
-    return "$" + price.toLocaleString(undefined, { maximumFractionDigits: 2 });
-  }
-  return "$" + parseFloat(price).toFixed(5);
-}
-
-function calcRealisticSetup(price, type) {
-  if (!price) return null;
-
-  const direction = Math.random() > 0.5 ? "BUY" : "SELL";
-  let entry, sl, tp, profit;
-
-  if (type === "crypto") {
-    if (direction === "BUY") {
-      entry = price;
-      sl = price * 0.995;
-      tp = price * 1.002;
-      profit = (tp - entry) * 0.1;
-    } else {
-      entry = price;
-      sl = price * 1.005;
-      tp = price * 0.998;
-      profit = (entry - tp) * 0.1;
-    }
-  } else {
-    if (direction === "BUY") {
-      entry = price;
-      sl = price * 0.9995;
-      tp = price * 1.0005;
-      profit = (tp - entry) * 100;
-    } else {
-      entry = price;
-      sl = price * 1.0005;
-      tp = price * 0.9995;
-      profit = (entry - tp) * 100;
-    }
-  }
-
-  return { direction, entry, sl, tp, profit };
+  return "$" + parseFloat(price).toFixed(2);
 }
 
 async function loadData() {
   const crypto = await fetchCryptoPrices();
-  const forex = await fetchForexPrices();
-  const allPrices = { ...crypto, ...forex };
 
   pairs.forEach(pair => {
-    const price = allPrices[pair.id];
+    const price = crypto[pair.id];
     
     if (!price) return;
 
@@ -546,30 +475,80 @@ async function loadData() {
       const changeClass = changePercent > 0 ? "up" : changePercent < 0 ? "down" : "up";
       const changeSign = changePercent > 0 ? "+" : "";
 
-      card.querySelector("[data-price]").textContent = formatPrice(price, pair.type);
+      card.querySelector("[data-price]").textContent = formatPrice(price);
       card.querySelector("[data-change]").textContent = changeSign + changePercent + "%";
       card.querySelector("[data-change]").className = "price-change " + changeClass;
 
       priceHistory[pair.id].push(price);
-      if (priceHistory[pair.id].length > 40) priceHistory[pair.id].shift();
+      if (priceHistory[pair.id].length > 50) priceHistory[pair.id].shift();
 
-      drawChart(pair.id, priceHistory[pair.id]);
+      // Create candlestick data
+      if (!candleData[pair.id]) candleData[pair.id] = [];
+      const lastCandle = candleData[pair.id][candleData[pair.id].length - 1];
+      
+      if (!lastCandle || Date.now() - lastCandle.time > 5000) {
+        candleData[pair.id].push({
+          open: price,
+          high: price,
+          low: price,
+          close: price,
+          time: Date.now()
+        });
+      } else {
+        lastCandle.high = Math.max(lastCandle.high, price);
+        lastCandle.low = Math.min(lastCandle.low, price);
+        lastCandle.close = price;
+      }
+
+      if (candleData[pair.id].length > 40) candleData[pair.id].shift();
+
+      drawCandlesticks(pair.id, candleData[pair.id]);
 
       prevPrices[pair.id] = price;
     }
+  });
+}
 
+function calcRealisticSetup(price, pairId) {
+  if (!price) return null;
+
+  const direction = Math.random() > 0.5 ? "BUY" : "SELL";
+  let entry, sl, tp;
+
+  if (direction === "BUY") {
+    entry = price;
+    sl = price * 0.995;
+    tp = price * 1.002;
+  } else {
+    entry = price;
+    sl = price * 1.005;
+    tp = price * 0.998;
+  }
+
+  const successRate = calcRealisticSuccessRate(priceHistory[pairId], pairId);
+
+  return { direction, entry, sl, tp, successRate };
+}
+
+async function loadSetups() {
+  const crypto = await fetchCryptoPrices();
+
+  pairs.forEach(pair => {
+    const price = crypto[pair.id];
     const setupCard = document.querySelector(`[data-setup="${pair.id}"]`);
-    if (setupCard) {
-      const setup = calcRealisticSetup(price, pair.type);
-      if (setup) {
-        const badgeClass = setup.direction === "BUY" ? "buy" : "sell";
-        setupCard.querySelector("[data-price]").textContent = formatPrice(price, pair.type);
-        setupCard.querySelector("[data-signal]").textContent = setup.direction;
-        setupCard.querySelector("[data-signal]").className = "signal-badge " + badgeClass;
-        setupCard.querySelector("[data-entry]").textContent = formatPrice(setup.entry, pair.type);
-        setupCard.querySelector("[data-sl]").textContent = formatPrice(setup.sl, pair.type);
-        setupCard.querySelector("[data-tp]").textContent = formatPrice(setup.tp, pair.type);
-      }
+    
+    if (!setupCard || !price) return;
+
+    const setup = calcRealisticSetup(price, pair.id);
+    if (setup) {
+      const badgeClass = setup.direction === "BUY" ? "buy" : "sell";
+      setupCard.querySelector("[data-price]").textContent = formatPrice(price);
+      setupCard.querySelector("[data-signal]").textContent = setup.direction;
+      setupCard.querySelector("[data-signal]").className = "signal-badge " + badgeClass;
+      setupCard.querySelector("[data-entry]").textContent = formatPrice(setup.entry);
+      setupCard.querySelector("[data-sl]").textContent = formatPrice(setup.sl);
+      setupCard.querySelector("[data-tp]").textContent = formatPrice(setup.tp);
+      setupCard.querySelector("[data-successRate]").textContent = `Success Rate: ${setup.successRate.toFixed(0)}%`;
     }
   });
 }
