@@ -134,10 +134,66 @@
       font-size: 12px;
       margin-top: 20px;
     }
+    /* MAINTENANCE MODE STYLES */
+    .maintenance-page {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a0e1a 0%, #0d1226 100%);
+    }
+    .maintenance-container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+    .maintenance-icon {
+      font-size: 80px;
+      margin-bottom: 30px;
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .maintenance-title {
+      font-size: 32px;
+      color: #00c896;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    .maintenance-message {
+      font-size: 18px;
+      color: #aaaaaa;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .maintenance-status {
+      font-size: 14px;
+      color: #666;
+      margin-top: 30px;
+    }
   </style>
 </head>
 <body>
 
+<!-- MAINTENANCE PAGE -->
+<div class="maintenance-page" id="maintenancePage">
+  <div class="maintenance-container">
+    <div class="maintenance-icon">⚙️</div>
+    <div class="maintenance-title">Under Maintenance</div>
+    <div class="maintenance-message">
+      We apologize for this inconvenience.<br/>
+      Site is currently under maintenance.
+    </div>
+    <div class="maintenance-status">
+      We'll be back online shortly. Thank you for your patience!
+    </div>
+  </div>
+</div>
+
+<!-- NORMAL PAGE -->
+<div id="normalPage">
 <header>
   <div class="logo">Lyttes<span>FX.ai</span></div>
   <nav>
@@ -164,6 +220,7 @@
 <footer>
   &copy; 2025 LyttesFX.ai — Real Market Data. Real Signals.
 </footer>
+</div>
 
 <script>
 const pairs = [
@@ -174,6 +231,27 @@ const pairs = [
   { name: "GBP/USD", id: "GBPUSD", type: "forex" },
   { name: "XAU/USD", id: "XAUUSD", type: "forex" }
 ];
+
+window.onload = function() {
+  checkMaintenance();
+  loadSetups();
+  setInterval(loadSetups, 300000);
+  setInterval(checkMaintenance, 5000);
+};
+
+function checkMaintenance() {
+  const maintenanceMode = localStorage.getItem("lyttesfx_maintenance") === "true";
+  const maintenancePage = document.getElementById("maintenancePage");
+  const normalPage = document.getElementById("normalPage");
+
+  if (maintenanceMode) {
+    maintenancePage.style.display = "block";
+    normalPage.style.display = "none";
+  } else {
+    maintenancePage.style.display = "none";
+    normalPage.style.display = "block";
+  }
+}
 
 function calcRealisticSetup(price, type) {
   if (!price) return null;
@@ -286,9 +364,6 @@ async function loadSetups() {
     `;
   });
 }
-
-loadSetups();
-setInterval(loadSetups, 300000);
 </script>
 
 </body>
