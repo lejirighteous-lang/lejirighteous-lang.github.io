@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LyttesFX.ai — Live Signals</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #0a0e1a;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px;
+      background-color: #0d1226;
+      border-bottom: 1px solid #1e2a45;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00c896;
+    }
+    .logo span { color: #ffffff; }
+    nav a {
+      color: #aaaaaa;
+      text-decoration: none;
+      margin-left: 20px;
+      font-size: 14px;
+    }
+    nav a:hover { color: #00c896; }
+    .page-title {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+    .page-title h1 {
+      font-size: 32px;
+      color: #00c896;
+    }
+    .page-subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #aaaaaa;
+      margin-top: 8px;
+    }
+    .signals-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    .signal-card {
+      background-color: #0d1226;
+      border: 1px solid #1e2a45;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .signal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .signal-card h3 {
+      font-size: 20px;
+      color: #ffffff;
+    }
+    .price-live {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00c896;
+      margin-bottom: 8px;
+    }
+    .price-change {
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+    .price-change.up { color: #00c896; }
+    .price-change.down { color: #ff4d4d; }
+    .signal-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+    .buy { background-color: #00c896; color: #000; }
+    .sell { background-color: #ff4d4d; color: #fff; }
+    .neutral { background-color: #444; color: #fff; }
+    .signal-info {
+      font-size: 13px;
+      color: #aaaaaa;
+      line-height: 1.8;
+      margin-bottom: 15px;
+    }
+    .signal-info b { color: #ffffff; }
+    .chart-container {
+      width: 100%;
+      height: 320px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 12px;
+      background-color: #000;
+    }
+    .chart-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #444;
+      font-size: 12px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Lyttes<span>FX.ai</span></div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="signals.html">Signals</a>
+    <a href="setups.html">Setups</a>
+  </nav>
+</header>
+
+<div class="page-title">
+  <h1>📡 Live Signals & Charts</h1>
+  <p class="page-subtitle">Real-time prices update every 30 seconds • Charts update live</p>
+</div>
+
+<div class="signals-grid" id="signals-container"></div>
+
+<footer>
+  &copy; 2025 LyttesFX.ai — Real Market Data. Real Signals.
+</footer>
+
+<script>
+const pairs = [
+  { name: "BTC/USD", id: "bitcoin", type: "crypto", tv: "BTCUSD", exchange: "BINANCE" },
+  { name: "SUI", id: "sui", type: "crypto", tv: "SUIUSD", exchange: "BINANCE" },
+  { name: "TON", id: "the-open-network", type: "crypto", tv: "TONUSDT", exchange: "BINANCE" },
+  { name: "NZD/USD", id: "NZDUSD", type: "forex", tv: "NZDUSD", exchange: "FX" },
+  { name: "GBP/USD", id: "GBPUSD", type: "forex", tv: "GBPUSD", exchange: "FX" },
+  { name: "XAU/USD", id: "XAUUSD", type: "forex", tv: "XAUUSD", exchange: "OANDA" }
+];
+
+let priceHistory = {};
+let prevPrices = {};
+let rsiValues = {};
+let loadedCards = {};
+
+function calcRSI(prices) {
+  if (prices.length < 2) return 50;
+  let gains = 0, losses = 0;
+  for (let i = 1; i < Math.min(prices.length, 14); i++) {
+    const diff = prices[prices.length - i] - prices[prices.length - i - 1];
+    if (diff > 0) gains += diff;
+    else losses += Math.abs(diff);
+  }
+  if (losses === 0) return 100;
+  const rs = gains / losses;
+  return 100 - (100 / (1 + rs));
+}
+
+function getSignal(price, id) {
+  if (!priceHistory[id]) priceHistory[id] = [];
+  priceHistory[id].push(price);
+  if (priceHistory[id].length > 20) priceHistory[id].shift();
+
+  const rsi = calcRSI(priceHistory[id]);
+  rsiValues[id] = rsi;
+  
+  const prev = prevPrices[id];
+  const change = prev ? ((price - prev) / prev) * 100 : 0;
+
+  if (rsi < 30 && change > -0.5) return "BUY";
+  if (rsi > 70 && change < 0.5) return "SELL";
+  return "NEUTRAL";
+}
+
+function formatPrice(price, type) {
+  if (!price) return "—";
+  if (type === "crypto" && price > 100) {
+    return "$" + price.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  }
+  return "$" + parseFloat(price).toFixed(5);
+}
+
+function getTVChart(pair) {
+  return `https://s.tradingview.com/widgetembed/?frameElementId=tv_chart&symbol=${pair.exchange}%3A${pair.tv}&interval=5&hidesidetoolbar=1&theme=dark&style=1&locale=en`;
+}
+
+async function fetchCryptoPrices() {
+  try {
+    const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,sui,the-open-network&vs_currencies=usd");
+    const data = await res.json();
+    return {
+      bitcoin: data.bitcoin?.usd,
+      sui: data.sui?.usd,
+      "the-open-network": data["the-open-network"]?.usd
+    };
+  } catch (e) {
+    return {};
+  }
+}
+
+async function fetchForexPrices() {
+  try {
+    const res = await fetch("https://api.exchangerate.host/latest?base=USD&symbols=NZD,GBP");
+    const data = await res.json();
+    const nzd = data.rates?.NZD ? (1 / data.rates.NZD) : null;
+    const gbp = data.rates?.GBP ? (1 / data.rates.GBP) : null;
+    
+    // For XAU, use alternative source
+    let xau = null;
+    try {
+      const xauRes = await fetch("https://api.metals.live/v1/spot/gold");
+      const xauData = await xauRes.json();
+      xau = xauData.price;
+    } catch (e) {
+      xau = null;
+    }
+    
+    return {
+      NZDUSD: nzd,
+      GBPUSD: gbp,
+      XAUUSD: xau
+    };
+  } catch (e) {
+    return {};
+  }
+}
+
+async function initializeCards() {
+  const container = document.getElementById("signals-container");
+  pairs.forEach(pair => {
+    const cardHtml = `
+      <div class="signal-card" data-pair="${pair.id}">
+        <div class="signal-header">
+          <h3>${pair.name}</h3>
+        </div>
+        <div class="price-live" data-price>Loading...</div>
+        <div class="price-change" data-change style="opacity:0;">+0.00%</div>
+        <span class="signal-badge neutral" data-signal>—</span>
+        <div class="signal-info" data-info>Initializing...</div>
+        <div class="chart-container">
+          <iframe src="${getTVChart(pair)}" allowtransparency="true" frameborder="0"></iframe>
+        </div>
+      </div>
+    `;
+    const newCard = document.createElement("div");
+    newCard.innerHTML = cardHtml;
+    container.appendChild(newCard.firstElementChild);
+    loadedCards[pair.id] = true;
+  });
+}
+
+async function updateSignals() {
+  const crypto = await fetchCryptoPrices();
+  const forex = await fetchForexPrices();
+  const allPrices = { ...crypto, ...forex };
+
+  pairs.forEach(pair => {
+    const price = allPrices[pair.id];
+    const card = document.querySelector(`[data-pair="${pair.id}"]`);
+    
+    if (!card) return;
+
+    if (price) {
+      const prev = prevPrices[pair.id];
+      const signal = getSignal(price, pair.id);
+      const badgeClass = signal === "BUY" ? "buy" : signal === "SELL" ? "sell" : "neutral";
+      
+      const changePercent = prev ? (((price - prev) / prev) * 100).toFixed(2) : "0.00";
+      const changeClass = changePercent > 0 ? "up" : changePercent < 0 ? "down" : "up";
+      const changeSign = changePercent > 0 ? "+" : "";
+
+      card.querySelector("[data-price]").textContent = formatPrice(price, pair.type);
+      card.querySelector("[data-change]").textContent = changeSign + changePercent + "%";
+      card.querySelector("[data-change]").className = "price-change " + changeClass;
+      card.querySelector("[data-change]").style.opacity = "1";
+      
+      const signalBadge = card.querySelector("[data-signal]");
+      signalBadge.textContent = signal;
+      signalBadge.className = "signal-badge " + badgeClass;
+      
+      card.querySelector("[data-info]").innerHTML = `
+        <b>RSI:</b> ${rsiValues[pair.id] ? rsiValues[pair.id].toFixed(1) : "—"} &nbsp;|&nbsp;
+        <b>Interval:</b> 5 Min &nbsp;|&nbsp;
+        <b>Updates:</b> Every 30s
+      `;
+
+      prevPrices[pair.id] = price;
+    }
+  });
+}
+
+initializeCards();
+updateSignals();
+setInterval(updateSignals, 30000);
+</script>
+
+</body>
+</html>

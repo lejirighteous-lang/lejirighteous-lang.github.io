@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LyttesFX.ai — Admin Panel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #0a0e1a;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px;
+      background-color: #0d1226;
+      border-bottom: 1px solid #1e2a45;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00c896;
+    }
+    .logo span { color: #ffffff; }
+    .btn-logout {
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn-logout:hover { background-color: #cc0000; }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 0 20px;
+    }
+    .admin-panel {
+      background-color: #0d1226;
+      border: 1px solid #1e2a45;
+      border-radius: 15px;
+      padding: 40px;
+    }
+    .admin-panel h1 {
+      font-size: 28px;
+      color: #00c896;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .admin-panel p {
+      color: #aaaaaa;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .control-section {
+      margin-bottom: 30px;
+      padding-bottom: 30px;
+      border-bottom: 1px solid #1e2a45;
+    }
+    .control-section:last-child {
+      border-bottom: none;
+    }
+    .control-title {
+      font-size: 18px;
+      color: #ffffff;
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    .control-description {
+      color: #aaaaaa;
+      font-size: 13px;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .toggle-switch {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 30px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #1e2a45;
+      transition: 0.3s;
+      border-radius: 30px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 4px;
+      bottom: 4px;
+      background-color: #ffffff;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #00c896;
+    }
+    input:checked + .slider:before {
+      transform: translateX(30px);
+    }
+    .status {
+      font-size: 13px;
+      color: #aaaaaa;
+    }
+    .status.active {
+      color: #00c896;
+    }
+    .status.inactive {
+      color: #ff4d4d;
+    }
+    .user-list {
+      background-color: #000;
+      border: 1px solid #1e2a45;
+      border-radius: 8px;
+      padding: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .user-item {
+      padding: 10px;
+      border-bottom: 1px solid #1e2a45;
+      font-size: 13px;
+      color: #aaaaaa;
+      display: flex;
+      justify-content: space-between;
+    }
+    .user-item:last-child {
+      border-bottom: none;
+    }
+    .user-badge {
+      background-color: #1e2a45;
+      color: #00c896;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .btn-primary {
+      background-color: #00c896;
+      color: #000;
+    }
+    .btn-primary:hover {
+      background-color: #00b080;
+    }
+    .btn-secondary {
+      background-color: #1e2a45;
+      color: #00c896;
+      border: 1px solid #00c896;
+    }
+    .btn-secondary:hover {
+      background-color: #2a3a55;
+    }
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      display: none;
+    }
+    .alert.success {
+      background-color: rgba(0, 200, 150, 0.2);
+      border: 1px solid #00c896;
+      color: #00c896;
+    }
+    .alert.warning {
+      background-color: rgba(255, 77, 77, 0.2);
+      border: 1px solid #ff4d4d;
+      color: #ff4d4d;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Lyttes<span>FX.ai</span></div>
+  <button class="btn-logout" onclick="handleLogout()">Logout</button>
+</header>
+
+<div class="container">
+  <div id="loginForm">
+    <div class="admin-panel">
+      <h1>🔐 Admin Access</h1>
+      <p>Enter your credentials to access the admin panel</p>
+      
+      <div class="form-group" style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 8px; color: #aaaaaa; font-size: 13px;">Username</label>
+        <input type="text" id="adminUsername" placeholder="Enter admin username" style="width: 100%; padding: 12px; border: 1px solid #1e2a45; border-radius: 8px; background-color: #0a0e1a; color: #fff;">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 8px; color: #aaaaaa; font-size: 13px;">Password</label>
+        <input type="password" id="adminPassword" placeholder="Enter admin password" style="width: 100%; padding: 12px; border: 1px solid #1e2a45; border-radius: 8px; background-color: #0a0e1a; color: #fff;">
+      </div>
+
+      <div id="loginError" style="color: #ff4d4d; font-size: 13px; margin-bottom: 15px; display: none;"></div>
+
+      <button class="btn btn-primary" style="width: 100%;" onclick="handleAdminLogin()">Access Admin Panel</button>
+    </div>
+  </div>
+
+  <div id="adminPanel" style="display: none;">
+    <div class="admin-panel">
+      <h1>⚙️ Admin Control Panel</h1>
+      <p>Manage your LyttesFX.ai platform</p>
+
+      <div id="successAlert" class="alert success"></div>
+      <div id="warningAlert" class="alert warning"></div>
+
+      <!-- Maintenance Mode -->
+      <div class="control-section">
+        <div class="control-title">🔧 Maintenance Mode</div>
+        <div class="control-description">
+          Enable maintenance mode to temporarily shut down the site. All users will see a maintenance message.
+        </div>
+        <div class="toggle-switch">
+          <label class="switch">
+            <input type="checkbox" id="maintenanceToggle" onchange="toggleMaintenance()">
+            <span class="slider"></span>
+          </label>
+          <span class="status" id="maintenanceStatus">Offline</span>
+        </div>
+      </div>
+
+      <!-- Active Users -->
+      <div class="control-section">
+        <div class="control-title">👥 Active Users</div>
+        <div class="control-description">
+          Registered users on the platform
+        </div>
+        <div class="user-list" id="usersList">
+          <div style="text-align: center; color: #aaa; padding: 20px;">No users yet</div>
+        </div>
+      </div>
+
+      <!-- System Status -->
+      <div class="control-section">
+        <div class="control-title">📊 System Status</div>
+        <div style="font-size: 13px; color: #aaaaaa; line-height: 2;">
+          <div>API Status: <span style="color: #00c896;">🟢 Online</span></div>
+          <div>Database: <span style="color: #00c896;">🟢 Connected</span></div>
+          <div>Charts: <span style="color: #00c896;">🟢 Live</span></div>
+          <div>Users: <span id="userCount" style="color: #00c896;">0 registered</span></div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="handleLogout()">Logout</button>
+        <button class="btn btn-primary" onclick="showAlert('success', 'Settings saved successfully!')">Save Changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+window.onload = function() {
+  checkAdminStatus();
+  loadUsers();
+};
+
+function checkAdminStatus() {
+  const maintenanceMode = localStorage.getItem("lyttesfx_maintenance") === "true";
+  const toggle = document.getElementById("maintenanceToggle");
+  const status = document.getElementById("maintenanceStatus");
+
+  if (maintenanceMode) {
+    toggle.checked = true;
+    status.textContent = "🔴 Active";
+    status.className = "status inactive";
+  } else {
+    toggle.checked = false;
+    status.textContent = "🟢 Offline";
+    status.className = "status active";
+  }
+}
+
+function handleAdminLogin() {
+  const username = document.getElementById("adminUsername").value;
+  const password = document.getElementById("adminPassword").value;
+  const errorEl = document.getElementById("loginError");
+
+  if (username === "admin" && password === "Righteous$&@2010") {
+    localStorage.setItem("lyttesfx_admin", "true");
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("adminPanel").style.display = "block";
+    checkAdminStatus();
+    loadUsers();
+  } else {
+    errorEl.textContent = "Invalid admin credentials";
+    errorEl.style.display = "block";
+  }
+}
+
+function toggleMaintenance() {
+  const toggle = document.getElementById("maintenanceToggle").checked;
+  const status = document.getElementById("maintenanceStatus");
+
+  if (toggle) {
+    localStorage.setItem("lyttesfx_maintenance", "true");
+    status.textContent = "🔴 Active";
+    status.className = "status inactive";
+    showAlert("warning", "Maintenance mode is ON. Site is now down for users.");
+  } else {
+    localStorage.setItem("lyttesfx_maintenance", "false");
+    status.textContent = "🟢 Offline";
+    status.className = "status active";
+    showAlert("success", "Maintenance mode is OFF. Site is now live.");
+  }
+}
+
+function loadUsers() {
+  const users = localStorage.getItem("lyttesfx_users");
+  const usersList = document.getElementById("usersList");
+  const userCount = document.getElementById("userCount");
+
+  if (!users) {
+    usersList.innerHTML = '<div style="text-align: center; color: #aaa; padding: 20px;">No users yet</div>';
+    userCount.textContent = "0 registered";
+    return;
+  }
+
+  const usersObj = JSON.parse(users);
+  const userArray = Object.keys(usersObj);
+  
+  if (userArray.length === 0) {
+    usersList.innerHTML = '<div style="text-align: center; color: #aaa; padding: 20px;">No users yet</div>';
+    userCount.textContent = "0 registered";
+    return;
+  }
+
+  usersList.innerHTML = userArray.map(username => `
+    <div class="user-item">
+      <span>👤 ${username}</span>
+      <span class="user-badge">Active</span>
+    </div>
+  `).join("");
+
+  userCount.textContent = userArray.length + " registered";
+}
+
+function showAlert(type, message) {
+  const successAlert = document.getElementById("successAlert");
+  const warningAlert = document.getElementById("warningAlert");
+
+  if (type === "success") {
+    successAlert.textContent = message;
+    successAlert.style.display = "block";
+    warningAlert.style.display = "none";
+    setTimeout(() => successAlert.style.display = "none", 3000);
+  } else {
+    warningAlert.textContent = message;
+    warningAlert.style.display = "block";
+    successAlert.style.display = "none";
+  }
+}
+
+function handleLogout() {
+  localStorage.removeItem("lyttesfx_admin");
+  window.location.href = "login.html";
+}
+
+// Check if already logged in as admin
+if (localStorage.getItem("lyttesfx_admin") === "true") {
+  document.getElementById("loginForm").style.display = "none";
+  document.getElementById("adminPanel").style.display = "block";
+  loadUsers();
+}
+</script>
+
+</body>
+</html>

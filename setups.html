@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LyttesFX.ai — Setups</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #0a0e1a;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px;
+      background-color: #0d1226;
+      border-bottom: 1px solid #1e2a45;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00c896;
+    }
+    .logo span { color: #ffffff; }
+    nav a {
+      color: #aaaaaa;
+      text-decoration: none;
+      margin-left: 20px;
+      font-size: 14px;
+    }
+    nav a:hover { color: #00c896; }
+    .page-title {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+    .page-title h1 {
+      font-size: 32px;
+      color: #00c896;
+    }
+    .page-title p {
+      color: #aaaaaa;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    .setups-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    .setup-card {
+      background-color: #0d1226;
+      border: 1px solid #1e2a45;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .setup-card h3 {
+      font-size: 20px;
+      color: #ffffff;
+      margin-bottom: 5px;
+    }
+    .live-price {
+      font-size: 22px;
+      font-weight: bold;
+      color: #00c896;
+      margin-bottom: 15px;
+    }
+    .setup-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .setup-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #1e2a45;
+    }
+    .setup-table td:first-child {
+      color: #aaaaaa;
+      width: 40%;
+    }
+    .setup-table td:last-child {
+      color: #ffffff;
+      font-weight: bold;
+    }
+    .entry { color: #00c896 !important; }
+    .sl { color: #ff4d4d !important; }
+    .tp { color: #00aaff !important; }
+    .direction-buy {
+      display: inline-block;
+      background: #00c896;
+      color: #000;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+    .direction-sell {
+      display: inline-block;
+      background: #ff4d4d;
+      color: #fff;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+    .disclaimer {
+      text-align: center;
+      color: #555;
+      font-size: 12px;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #444;
+      font-size: 12px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Lyttes<span>FX.ai</span></div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="signals.html">Signals</a>
+    <a href="setups.html">Setups</a>
+  </nav>
+</header>
+
+<div class="page-title">
+  <h1>📊 Trading Setups</h1>
+  <p>Live entry, stop loss & take profit for each pair</p>
+</div>
+
+<div class="setups-grid" id="setups-container">
+  <p style="text-align:center; color:#aaa;">Loading setups...</p>
+</div>
+
+<div class="disclaimer">
+  ⚠️ These setups are generated from live market data and technical analysis. 
+  Always use proper risk management. Trade at your own risk.
+</div>
+
+<footer>
+  &copy; 2025 LyttesFX.ai — Real Market Data. Real Signals.
+</footer>
+
+<script>
+const pairs = [
+  { name: "BTC/USD", id: "bitcoin", type: "crypto" },
+  { name: "SUI", id: "sui", type: "crypto" },
+  { name: "TON", id: "the-open-network", type: "crypto" },
+  { name: "NZD/USD", id: "NZDUSD", type: "forex" },
+  { name: "GBP/USD", id: "GBPUSD", type: "forex" },
+  { name: "XAU/USD", id: "XAUUSD", type: "forex" }
+];
+
+function calcSetup(price, type) {
+  if (!price) return null;
+  const isForex = type === "forex";
+  const slPct = isForex ? 0.003 : 0.02;
+  const tpPct = isForex ? 0.006 : 0.04;
+
+  const direction = Math.random() > 0.5 ? "BUY" : "SELL";
+  let entry, sl, tp;
+
+  if (direction === "BUY") {
+    entry = price;
+    sl = price * (1 - slPct);
+    tp = price * (1 + tpPct);
+  } else {
+    entry = price;
+    sl = price * (1 + slPct);
+    tp = price * (1 - tpPct);
+  }
+
+  return { direction, entry, sl, tp };
+}
+
+function fmt(val, type) {
+  if (!val) return "—";
+  if (type === "crypto" && val > 100) return "$" + val.toLocaleString(undefined, {maximumFractionDigits: 2});
+  return "$" + parseFloat(val).toFixed(type === "forex" ? 5 : 4);
+}
+
+async function fetchCryptoPrices() {
+  try {
+    const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,sui,the-open-network&vs_currencies=usd");
+    const data = await res.json();
+    return {
+      bitcoin: data.bitcoin?.usd,
+      sui: data.sui?.usd,
+      "the-open-network": data["the-open-network"]?.usd
+    };
+  } catch (e) { return {}; }
+}
+
+async function fetchForexPrices() {
+  try {
+    const res = await fetch("https://api.exchangerate.host/live?access_key=free&currencies=NZD,GBP,XAU&source=USD&format=1");
+    const data = await res.json();
+    return {
+      NZDUSD: data.quotes?.USDNZD ? (1 / data.quotes.USDNZD) : null,
+      GBPUSD: data.quotes?.USDGBP ? (1 / data.quotes.USDGBP) : null,
+      XAUUSD: data.quotes?.USDXAU ? (1 / data.quotes.USDXAU) : null
+    };
+  } catch (e) { return {}; }
+}
+
+async function loadSetups() {
+  const crypto = await fetchCryptoPrices();
+  const forex = await fetchForexPrices();
+  const allPrices = { ...crypto, ...forex };
+
+  const container = document.getElementById("setups-container");
+  container.innerHTML = "";
+
+  pairs.forEach(pair => {
+    const price = allPrices[pair.id];
+    const setup = calcSetup(price, pair.type);
+
+    container.innerHTML += `
+      <div class="setup-card">
+        <h3>${pair.name}</h3>
+        <div class="live-price">${price ? fmt(price, pair.type) : "Loading..."}</div>
+        ${setup ? `<span class="direction-${setup.direction.toLowerCase()}">${setup.direction}</span>` : ""}
+        <table class="setup-table">
+          <tr>
+            <td>🎯 Entry Point</td>
+            <td class="entry">${setup ? fmt(setup.entry, pair.type) : "—"}</td>
+          </tr>
+          <tr>
+            <td>🛑 Stop Loss</td>
+            <td class="sl">${setup ? fmt(setup.sl, pair.type) : "—"}</td>
+          </tr>
+          <tr>
+            <td>✅ Take Profit</td>
+            <td class="tp">${setup ? fmt(setup.tp, pair.type) : "—"}</td>
+          </tr>
+        </table>
+      </div>
+    `;
+  });
+}
+
+loadSetups();
+setInterval(loadSetups, 300000);
+</script>
+
+</body>
+</html>

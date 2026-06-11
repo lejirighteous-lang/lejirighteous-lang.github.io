@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LyttesFX.ai</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #0a0e1a;
+      color: #ffffff;
+      font-family: 'Arial', sans-serif;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px;
+      background-color: #0d1226;
+      border-bottom: 1px solid #1e2a45;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00c896;
+    }
+    .logo span { color: #ffffff; }
+    nav a {
+      color: #aaaaaa;
+      text-decoration: none;
+      margin-left: 20px;
+      font-size: 14px;
+    }
+    nav a:hover { color: #00c896; }
+    .hero {
+      text-align: center;
+      padding: 80px 20px;
+    }
+    .hero h1 {
+      font-size: 42px;
+      color: #00c896;
+      margin-bottom: 15px;
+    }
+    .hero p {
+      font-size: 16px;
+      color: #aaaaaa;
+      margin-bottom: 30px;
+    }
+    .btn {
+      background-color: #00c896;
+      color: #000000;
+      padding: 12px 30px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .pairs-section {
+      padding: 40px 20px;
+      text-align: center;
+    }
+    .pairs-section h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #ffffff;
+    }
+    .pairs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .pair-card {
+      background-color: #0d1226;
+      border: 1px solid #1e2a45;
+      border-radius: 10px;
+      padding: 20px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #00c896;
+    }
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #444;
+      font-size: 12px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Lyttes<span>FX.ai</span></div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="signals.html">Signals</a>
+    <a href="setups.html">Setups</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Welcome to LyttesFX.ai</h1>
+  <p>Live trading signals powered by real market data</p>
+  <a href="signals.html" class="btn">View Live Signals</a>
+</section>
+
+<section class="pairs-section">
+  <h2>Available Trading Pairs</h2>
+  <div class="pairs-grid">
+    <div class="pair-card">BTC/USD</div>
+    <div class="pair-card">NZD/USD</div>
+    <div class="pair-card">GBP/USD</div>
+    <div class="pair-card">XAU/USD</div>
+    <div class="pair-card">SUI</div>
+    <div class="pair-card">TON</div>
+  </div>
+</section>
+
+<footer>
+  &copy; 2025 LyttesFX.ai — Real Market Data. Real Signals.
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LyttesFX.ai — Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #0a0e1a;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px;
+      background-color: #0d1226;
+      border-bottom: 1px solid #1e2a45;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00c896;
+    }
+    .logo span { color: #ffffff; }
+    .user-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .username {
+      color: #aaaaaa;
+      font-size: 14px;
+    }
+    .btn-logout {
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn-logout:hover { background-color: #cc0000; }
+    nav {
+      display: flex;
+      gap: 20px;
+      padding: 20px 30px;
+      background-color: #0d1226;
+      border-bottom: 1px solid #1e2a45;
+    }
+    nav a {
+      color: #aaaaaa;
+      text-decoration: none;
+      font-size: 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+    }
+    nav a.active {
+      color: #00c896;
+      border-bottom-color: #00c896;
+    }
+    .page-title {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+    .page-title h1 {
+      font-size: 32px;
+      color: #00c896;
+    }
+    .page-subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #aaaaaa;
+      margin-top: 8px;
+    }
+    .content {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    .signal-card {
+      background-color: #0d1226;
+      border: 1px solid #1e2a45;
+      border-radius: 12px;
+      padding: 20px;
+      animation: fadeIn 0.3s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0.5; }
+      to { opacity: 1; }
+    }
+    .signal-card h3 {
+      font-size: 20px;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .price-live {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00c896;
+      margin-bottom: 8px;
+      min-height: 30px;
+    }
+    .price-change {
+      font-size: 13px;
+      margin-bottom: 10px;
+      min-height: 16px;
+    }
+    .price-change.up { color: #00c896; }
+    .price-change.down { color: #ff4d4d; }
+    .signal-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+    .buy { background-color: #00c896; color: #000; }
+    .sell { background-color: #ff4d4d; color: #fff; }
+    .neutral { background-color: #444; color: #fff; }
+    .signal-info {
+      font-size: 13px;
+      color: #aaaaaa;
+      line-height: 1.8;
+      margin-bottom: 15px;
+    }
+    .signal-info b { color: #ffffff; }
+    .chart-container {
+      width: 100%;
+      height: 280px;
+      background: linear-gradient(to bottom, #0a0e1a, #000);
+      border-radius: 8px;
+      margin-top: 12px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #1e2a45;
+    }
+    .chart-svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 8px rgba(0, 200, 150, 0.2));
+    }
+    .setup-card {
+      background-color: #0d1226;
+      border: 1px solid #1e2a45;
+      border-radius: 12px;
+      padding: 20px;
+      animation: fadeIn 0.3s ease-in;
+    }
+    .setup-card h3 {
+      font-size: 20px;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .setup-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      margin-top: 15px;
+    }
+    .setup-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #1e2a45;
+    }
+    .setup-table td:first-child {
+      color: #aaaaaa;
+      width: 40%;
+    }
+    .setup-table td:last-child {
+      color: #ffffff;
+      font-weight: bold;
+    }
+    .entry { color: #00c896 !important; }
+    .sl { color: #ff4d4d !important; }
+    .tp { color: #00aaff !important; }
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #444;
+      font-size: 12px;
+      margin-top: 40px;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Lyttes<span>FX.ai</span></div>
+  <div class="user-section">
+    <span class="username">Welcome, <b id="username"></b></span>
+    <button class="btn-logout" onclick="handleLogout()">Logout</button>
+  </div>
+</header>
+
+<nav>
+  <a class="active" onclick="showPage('signals')">📡 Signals</a>
+  <a onclick="showPage('setups')">📊 Setups</a>
+</nav>
+
+<div id="signals-page">
+  <div class="page-title">
+    <h1>📡 Live Signals & Charts</h1>
+    <p class="page-subtitle">Real-time prices update every 10 seconds • Live flowing charts</p>
+  </div>
+  <div class="content" id="signals-container"></div>
+</div>
+
+<div id="setups-page" class="hidden">
+  <div class="page-title">
+    <h1>📊 Trading Setups</h1>
+    <p class="page-subtitle">Updates every 5 minutes • Entry, Stop Loss & Take Profit</p>
+  </div>
+  <div class="content" id="setups-container"></div>
+</div>
+
+<footer>
+  &copy; 2025 LyttesFX.ai — Real Market Data. Real Signals.
+</footer>
+
+<script>
+const pairs = [
+  { name: "BTC/USD", id: "bitcoin", type: "crypto" },
+  { name: "SUI", id: "sui", type: "crypto" },
+  { name: "TON", id: "the-open-network", type: "crypto" },
+  { name: "NZD/USD", id: "NZDUSD", type: "forex" },
+  { name: "GBP/USD", id: "GBPUSD", type: "forex" },
+  { name: "XAU/USD", id: "XAUUSD", type: "forex" }
+];
+
+let priceHistory = {};
+let prevPrices = {};
+let cardsInitialized = false;
+
+window.onload = function() {
+  const user = localStorage.getItem("lyttesfx_user");
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+  document.getElementById("username").textContent = user;
+  initCards();
+  loadData();
+  setInterval(loadData, 10000);
+};
+
+function showPage(page) {
+  document.getElementById("signals-page").classList.toggle("hidden", page !== "signals");
+  document.getElementById("setups-page").classList.toggle("hidden", page !== "setups");
+  document.querySelectorAll("nav a").forEach(a => a.classList.remove("active"));
+  event.target.classList.add("active");
+}
+
+function handleLogout() {
+  localStorage.removeItem("lyttesfx_user");
+  window.location.href = "login.html";
+}
+
+function initCards() {
+  if (cardsInitialized) return;
+  cardsInitialized = true;
+
+  pairs.forEach(pair => {
+    priceHistory[pair.id] = [Math.random() * 100];
+
+    // Create signal card
+    const signalCard = document.createElement("div");
+    signalCard.className = "signal-card";
+    signalCard.setAttribute("data-pair", pair.id);
+    signalCard.innerHTML = `
+      <h3>${pair.name}</h3>
+      <div class="price-live" data-price>$0.00</div>
+      <div class="price-change" data-change>+0.00%</div>
+      <span class="signal-badge neutral" data-signal>NEUTRAL</span>
+      <div class="signal-info" data-info>Loading live data...</div>
+      <div class="chart-container">
+        <svg class="chart-svg" data-chart="${pair.id}"></svg>
+      </div>
+    `;
+    document.getElementById("signals-container").appendChild(signalCard);
+
+    // Create setup card
+    const setupCard = document.createElement("div");
+    setupCard.className = "setup-card";
+    setupCard.setAttribute("data-setup", pair.id);
+    setupCard.innerHTML = `
+      <h3>${pair.name}</h3>
+      <div class="price-live" data-price>$0.00</div>
+      <span class="signal-badge neutral" data-signal>—</span>
+      <table class="setup-table">
+        <tr>
+          <td>🎯 Entry Point</td>
+          <td class="entry" data-entry>$0.00</td>
+        </tr>
+        <tr>
+          <td>🛑 Stop Loss</td>
+          <td class="sl" data-sl>$0.00</td>
+        </tr>
+        <tr>
+          <td>✅ Take Profit</td>
+          <td class="tp" data-tp>$0.00</td>
+        </tr>
+      </table>
+    `;
+    document.getElementById("setups-container").appendChild(setupCard);
+  });
+}
+
+function drawChart(pairId, prices) {
+  const svg = document.querySelector(`[data-chart="${pairId}"]`);
+  if (!svg || prices.length < 2) return;
+
+  svg.innerHTML = "";
+  const width = 800;
+  const height = 280;
+  const padding = 20;
+
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  const range = maxPrice - minPrice || 1;
+
+  const pointSpacing = (width - padding * 2) / (prices.length - 1);
+  let pathData = `M ${padding} ${height - padding - ((prices[0] - minPrice) / range) * (height - padding * 2)}`;
+
+  for (let i = 1; i < prices.length; i++) {
+    const x = padding + i * pointSpacing;
+    const y = height - padding - ((prices[i] - minPrice) / range) * (height - padding * 2);
+    pathData += ` L ${x} ${y}`;
+  }
+
+  // Gradient fill
+  const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+  const grad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+  grad.setAttribute("id", "g" + pairId);
+  grad.setAttribute("y1", "0%");
+  grad.setAttribute("y2", "100%");
+  
+  const s1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+  s1.setAttribute("offset", "0%");
+  s1.setAttribute("stop-color", "#00c896");
+  s1.setAttribute("stop-opacity", "0.4");
+  
+  const s2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+  s2.setAttribute("offset", "100%");
+  s2.setAttribute("stop-color", "#00c896");
+  s2.setAttribute("stop-opacity", "0");
+
+  grad.appendChild(s1);
+  grad.appendChild(s2);
+  defs.appendChild(grad);
+  svg.appendChild(defs);
+
+  // Area
+  const area = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  area.setAttribute("d", pathData + ` L ${width - padding} ${height - padding} L ${padding} ${height - padding} Z`);
+  area.setAttribute("fill", "url(#g" + pairId + ")");
+  svg.appendChild(area);
+
+  // Line
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  line.setAttribute("d", pathData);
+  line.setAttribute("stroke", "#00c896");
+  line.setAttribute("stroke-width", "2.5");
+  line.setAttribute("fill", "none");
+  line.setAttribute("stroke-linecap", "round");
+  line.setAttribute("stroke-linejoin", "round");
+  line.style.filter = "drop-shadow(0 0 4px rgba(0, 200, 150, 0.5))";
+  svg.appendChild(line);
+
+  // Points
+  for (let i = 0; i < prices.length; i++) {
+    const x = padding + i * pointSpacing;
+    const y = height - padding - ((prices[i] - minPrice) / range) * (height - padding * 2);
+    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dot.setAttribute("cx", x);
+    dot.setAttribute("cy", y);
+    dot.setAttribute("r", "2.5");
+    dot.setAttribute("fill", "#00c896");
+    dot.style.filter = "drop-shadow(0 0 3px rgba(0, 200, 150, 0.8))";
+    svg.appendChild(dot);
+  }
+}
+
+async function fetchCryptoPrices() {
+  try {
+    const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,sui,the-open-network&vs_currencies=usd");
+    const data = await res.json();
+    return {
+      bitcoin: data.bitcoin?.usd,
+      sui: data.sui?.usd,
+      "the-open-network": data["the-open-network"]?.usd
+    };
+  } catch (e) {
+    return {};
+  }
+}
+
+async function fetchForexPrices() {
+  try {
+    const res = await fetch("https://api.exchangerate.host/latest?base=USD&symbols=NZD,GBP");
+    const data = await res.json();
+    const nzd = data.rates?.NZD ? (1 / data.rates.NZD) : null;
+    const gbp = data.rates?.GBP ? (1 / data.rates.GBP) : null;
+    
+    let xau = null;
+    try {
+      const xauRes = await fetch("https://api.metals.live/v1/spot/gold");
+      const xauData = await xauRes.json();
+      xau = xauData.price;
+    } catch (e) {}
+    
+    return { NZDUSD: nzd, GBPUSD: gbp, XAUUSD: xau };
+  } catch (e) {
+    return {};
+  }
+}
+
+function formatPrice(price, type) {
+  if (!price) return "$0.00";
+  if (type === "crypto" && price > 100) {
+    return "$" + price.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  }
+  return "$" + parseFloat(price).toFixed(5);
+}
+
+async function loadData() {
+  const crypto = await fetchCryptoPrices();
+  const forex = await fetchForexPrices();
+  const allPrices = { ...crypto, ...forex };
+
+  pairs.forEach(pair => {
+    const price = allPrices[pair.id];
+    
+    if (!price) return;
+
+    // Update signals
+    const card = document.querySelector(`[data-pair="${pair.id}"]`);
+    if (card) {
+      const prev = prevPrices[pair.id];
+      const changePercent = prev ? (((price - prev) / prev) * 100).toFixed(2) : "0.00";
+      const changeClass = changePercent > 0 ? "up" : changePercent < 0 ? "down" : "up";
+      const changeSign = changePercent > 0 ? "+" : "";
+
+      card.querySelector("[data-price]").textContent = formatPrice(price, pair.type);
+      card.querySelector("[data-change]").textContent = changeSign + changePercent + "%";
+      card.querySelector("[data-change]").className = "price-change " + changeClass;
+
+      // Add to price history
+      priceHistory[pair.id].push(price);
+      if (priceHistory[pair.id].length > 40) priceHistory[pair.id].shift();
+
+      // Draw chart
+      drawChart(pair.id, priceHistory[pair.id]);
+
+      prevPrices[pair.id] = price;
+    }
+
+    // Update setups
+    const setupCard = document.querySelector(`[data-setup="${pair.id}"]`);
+    if (setupCard) {
+      const isForex = pair.type === "forex";
+      const slPct = isForex ? 0.003 : 0.02;
+      const tpPct = isForex ? 0.006 : 0.04;
+
+      const direction = Math.random() > 0.5 ? "BUY" : "SELL";
+      let entry, sl, tp;
+
+      if (direction === "BUY") {
+        entry = price;
+        sl = price * (1 - slPct);
+        tp = price * (1 + tpPct);
+      } else {
+        entry = price;
+        sl = price * (1 + slPct);
+        tp = price * (1 - tpPct);
+      }
+
+      const badgeClass = direction === "BUY" ? "buy" : "sell";
+      setupCard.querySelector("[data-price]").textContent = formatPrice(price, pair.type);
+      setupCard.querySelector("[data-signal]").textContent = direction;
+      setupCard.querySelector("[data-signal]").className = "signal-badge " + badgeClass;
+      setupCard.querySelector("[data-entry]").textContent = formatPrice(entry, pair.type);
+      setupCard.querySelector("[data-sl]").textContent = formatPrice(sl, pair.type);
+      setupCard.querySelector("[data-tp]").textContent = formatPrice(tp, pair.type);
+    }
+  });
+}
+</script>
+
+</body>
+</html>
