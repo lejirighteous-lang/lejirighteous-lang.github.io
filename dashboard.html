@@ -248,7 +248,7 @@
 <div id="signals-page">
   <div class="page-title">
     <h1>📡 Live Signals & Candlesticks</h1>
-    <p class="page-subtitle">Real candlestick charts updating every 1 second • Live market data</p>
+    <p class="page-subtitle">Real candlestick charts updating every 1 second • Lightning fast</p>
   </div>
   <div class="content" id="signals-container"></div>
 </div>
@@ -266,21 +266,19 @@
 </footer>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-
 <script>
 const pairs = [
-  { name: "BNB/USDT", id: "binancecoin", type: "crypto", symbol: "BNBUSDT" },
-  { name: "ADA/USDT", id: "cardano", type: "crypto", symbol: "ADAUSDT" },
-  { name: "SOL/USDT", id: "solana", type: "crypto", symbol: "SOLUSDT" },
-  { name: "XRP/USDT", id: "ripple", type: "crypto", symbol: "XRPUSDT" },
-  { name: "ETH/USDT", id: "ethereum", type: "crypto", symbol: "ETHUSDT" }
+  { name: "BTC/USDT", symbol: "BTCUSDT" },
+  { name: "BNB/USDT", symbol: "BNBUSDT" },
+  { name: "ADA/USDT", symbol: "ADAUSDT" },
+  { name: "SOL/USDT", symbol: "SOLUSDT" },
+  { name: "XRP/USDT", symbol: "XRPUSDT" },
+  { name: "ETH/USDT", symbol: "ETHUSDT" }
 ];
 
 let priceHistory = {};
-let prevPrices = {};
 let candleData = {};
-let charts = {};
+let prevPrices = {};
 
 window.onload = function() {
   checkMaintenance();
@@ -299,15 +297,12 @@ window.onload = function() {
 
 function checkMaintenance() {
   const maintenanceMode = localStorage.getItem("lyttesfx_maintenance") === "true";
-  const maintenancePage = document.getElementById("maintenancePage");
-  const normalDashboard = document.getElementById("normalDashboard");
-
   if (maintenanceMode) {
-    maintenancePage.style.display = "block";
-    normalDashboard.style.display = "none";
+    document.getElementById("maintenancePage").style.display = "block";
+    document.getElementById("normalDashboard").style.display = "none";
   } else {
-    maintenancePage.style.display = "none";
-    normalDashboard.style.display = "block";
+    document.getElementById("maintenancePage").style.display = "none";
+    document.getElementById("normalDashboard").style.display = "block";
   }
 }
 
@@ -325,52 +320,52 @@ function handleLogout() {
 
 function initCards() {
   pairs.forEach(pair => {
-    priceHistory[pair.id] = [];
-    candleData[pair.id] = [];
+    priceHistory[pair.symbol] = [];
+    candleData[pair.symbol] = [];
 
     const signalCard = document.createElement("div");
     signalCard.className = "signal-card";
-    signalCard.setAttribute("data-pair", pair.id);
+    signalCard.setAttribute("data-pair", pair.symbol);
     signalCard.innerHTML = `
       <h3>${pair.name}</h3>
       <div class="price-live" data-price>$0.00</div>
       <div class="price-change" data-change>+0.00%</div>
       <span class="signal-badge neutral" data-signal>NEUTRAL</span>
       <div class="chart-container">
-        <canvas class="chart-canvas" data-chart="${pair.id}"></canvas>
+        <canvas class="chart-canvas" data-chart="${pair.symbol}"></canvas>
       </div>
     `;
     document.getElementById("signals-container").appendChild(signalCard);
 
     const setupCard = document.createElement("div");
     setupCard.className = "setup-card";
-    setupCard.setAttribute("data-setup", pair.id);
+    setupCard.setAttribute("data-setup", pair.symbol);
     setupCard.innerHTML = `
       <h3>${pair.name}</h3>
       <div class="price-live" data-price>$0.00</div>
       <span class="signal-badge neutral" data-signal>—</span>
       <table class="setup-table">
         <tr>
-          <td>🎯 Entry Point</td>
+          <td>🎯 Entry</td>
           <td class="entry" data-entry>$0.00</td>
         </tr>
         <tr>
-          <td>🛑 Stop Loss</td>
+          <td>🛑 SL</td>
           <td class="sl" data-sl>$0.00</td>
         </tr>
         <tr>
-          <td>✅ Take Profit</td>
+          <td>✅ TP</td>
           <td class="tp" data-tp>$0.00</td>
         </tr>
       </table>
-      <div class="success-rate" data-successRate>Success Rate: —%</div>
+      <div class="success-rate" data-rate>Success: —%</div>
     `;
     document.getElementById("setups-container").appendChild(setupCard);
   });
 }
 
-function drawCandlesticks(pairId, candles) {
-  const canvas = document.querySelector(`[data-chart="${pairId}"]`);
+function drawCandlesticks(symbol, candles) {
+  const canvas = document.querySelector(`[data-chart="${symbol}"]`);
   if (!canvas || candles.length < 2) return;
 
   const ctx = canvas.getContext("2d");
@@ -394,7 +389,6 @@ function drawCandlesticks(pairId, candles) {
     const openY = height - 20 - ((candle.open - minPrice) / range) * (height - 40);
     const closeY = height - 20 - ((candle.close - minPrice) / range) * (height - 40);
 
-    // Wick
     ctx.strokeStyle = candle.close >= candle.open ? "#00c896" : "#ff4d4d";
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -402,154 +396,104 @@ function drawCandlesticks(pairId, candles) {
     ctx.lineTo(x, lowY);
     ctx.stroke();
 
-    // Body
     ctx.fillStyle = candle.close >= candle.open ? "#00c896" : "#ff4d4d";
     ctx.fillRect(x - candleWidth / 2, Math.min(openY, closeY), candleWidth, Math.abs(closeY - openY) || 1);
   });
 }
 
-async function fetchCryptoPrices() {
+async function fetchBinancePrices() {
   try {
-    const ids = "binancecoin,cardano,solana,ripple,ethereum";
-    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
+    const symbols = pairs.map(p => p.symbol).join(',');
+    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbols=["${symbols.split(',').join('","')}"]`);
     const data = await res.json();
-    return {
-      binancecoin: data.binancecoin?.usd,
-      cardano: data.cardano?.usd,
-      solana: data.solana?.usd,
-      ripple: data.ripple?.usd,
-      ethereum: data.ethereum?.usd
-    };
+    const prices = {};
+    data.forEach(item => {
+      prices[item.symbol] = parseFloat(item.price);
+    });
+    return prices;
   } catch (e) {
+    console.error('Binance API error:', e);
     return {};
   }
 }
 
-function calcRealisticSuccessRate(prices, pairId) {
+function calcSuccessRate(prices) {
   if (!prices || prices.length < 10) return 50;
-
   const recent = prices.slice(-10);
-  const avgPrice = recent.reduce((a, b) => a + b) / recent.length;
-  const volatility = Math.max(...recent) - Math.min(...recent);
-  const trend = recent[recent.length - 1] > recent[0] ? 1 : -1;
-
-  let rsi = 50;
-  if (recent.length > 1) {
-    let gains = 0, losses = 0;
-    for (let i = 1; i < recent.length; i++) {
-      const diff = recent[i] - recent[i - 1];
-      if (diff > 0) gains += diff;
-      else losses += Math.abs(diff);
-    }
-    if (losses > 0) {
-      rsi = 100 - (100 / (1 + gains / losses));
-    }
+  let gains = 0, losses = 0;
+  for (let i = 1; i < recent.length; i++) {
+    const diff = recent[i] - recent[i - 1];
+    if (diff > 0) gains += diff;
+    else losses += Math.abs(diff);
   }
-
-  let successRate = 50;
-  if (rsi < 30) successRate += 15;
-  if (rsi > 70) successRate += 15;
-  if (trend > 0) successRate += 10;
-  if (volatility < avgPrice * 0.01) successRate += 5;
-
-  return Math.min(95, Math.max(30, successRate));
-}
-
-function formatPrice(price) {
-  if (!price) return "$0.00";
-  return "$" + parseFloat(price).toFixed(2);
+  const rsi = losses > 0 ? 100 - (100 / (1 + gains / losses)) : 50;
+  let rate = 50;
+  if (rsi < 30) rate += 20;
+  if (rsi > 70) rate += 20;
+  return Math.min(95, Math.max(30, rate));
 }
 
 async function loadData() {
-  const crypto = await fetchCryptoPrices();
+  const prices = await fetchBinancePrices();
 
   pairs.forEach(pair => {
-    const price = crypto[pair.id];
-    
+    const price = prices[pair.symbol];
     if (!price) return;
 
-    const card = document.querySelector(`[data-pair="${pair.id}"]`);
+    const card = document.querySelector(`[data-pair="${pair.symbol}"]`);
     if (card) {
-      const prev = prevPrices[pair.id];
-      const changePercent = prev ? (((price - prev) / prev) * 100).toFixed(2) : "0.00";
-      const changeClass = changePercent > 0 ? "up" : changePercent < 0 ? "down" : "up";
-      const changeSign = changePercent > 0 ? "+" : "";
+      const prev = prevPrices[pair.symbol];
+      const change = prev ? (((price - prev) / prev) * 100).toFixed(2) : "0.00";
 
-      card.querySelector("[data-price]").textContent = formatPrice(price);
-      card.querySelector("[data-change]").textContent = changeSign + changePercent + "%";
-      card.querySelector("[data-change]").className = "price-change " + changeClass;
+      card.querySelector("[data-price]").textContent = "$" + price.toFixed(2);
+      card.querySelector("[data-change]").textContent = (change > 0 ? "+" : "") + change + "%";
+      card.querySelector("[data-change]").className = "price-change " + (change > 0 ? "up" : "down");
 
-      priceHistory[pair.id].push(price);
-      if (priceHistory[pair.id].length > 50) priceHistory[pair.id].shift();
+      priceHistory[pair.symbol].push(price);
+      if (priceHistory[pair.symbol].length > 50) priceHistory[pair.symbol].shift();
 
-      // Create candlestick data
-      if (!candleData[pair.id]) candleData[pair.id] = [];
-      const lastCandle = candleData[pair.id][candleData[pair.id].length - 1];
-      
-      if (!lastCandle || Date.now() - lastCandle.time > 5000) {
-        candleData[pair.id].push({
-          open: price,
-          high: price,
-          low: price,
-          close: price,
-          time: Date.now()
-        });
+      if (!candleData[pair.symbol][candleData[pair.symbol].length - 1] || Date.now() - candleData[pair.symbol][candleData[pair.symbol].length - 1].time > 5000) {
+        candleData[pair.symbol].push({ open: price, high: price, low: price, close: price, time: Date.now() });
       } else {
-        lastCandle.high = Math.max(lastCandle.high, price);
-        lastCandle.low = Math.min(lastCandle.low, price);
-        lastCandle.close = price;
+        const last = candleData[pair.symbol][candleData[pair.symbol].length - 1];
+        last.high = Math.max(last.high, price);
+        last.low = Math.min(last.low, price);
+        last.close = price;
       }
+      if (candleData[pair.symbol].length > 40) candleData[pair.symbol].shift();
 
-      if (candleData[pair.id].length > 40) candleData[pair.id].shift();
-
-      drawCandlesticks(pair.id, candleData[pair.id]);
-
-      prevPrices[pair.id] = price;
+      drawCandlesticks(pair.symbol, candleData[pair.symbol]);
+      prevPrices[pair.symbol] = price;
     }
   });
 }
 
-function calcRealisticSetup(price, pairId) {
-  if (!price) return null;
-
-  const direction = Math.random() > 0.5 ? "BUY" : "SELL";
-  let entry, sl, tp;
-
-  if (direction === "BUY") {
-    entry = price;
-    sl = price * 0.995;
-    tp = price * 1.002;
-  } else {
-    entry = price;
-    sl = price * 1.005;
-    tp = price * 0.998;
-  }
-
-  const successRate = calcRealisticSuccessRate(priceHistory[pairId], pairId);
-
-  return { direction, entry, sl, tp, successRate };
-}
-
 async function loadSetups() {
-  const crypto = await fetchCryptoPrices();
+  const prices = await fetchBinancePrices();
 
   pairs.forEach(pair => {
-    const price = crypto[pair.id];
-    const setupCard = document.querySelector(`[data-setup="${pair.id}"]`);
-    
+    const price = prices[pair.symbol];
+    const setupCard = document.querySelector(`[data-setup="${pair.symbol}"]`);
     if (!setupCard || !price) return;
 
-    const setup = calcRealisticSetup(price, pair.id);
-    if (setup) {
-      const badgeClass = setup.direction === "BUY" ? "buy" : "sell";
-      setupCard.querySelector("[data-price]").textContent = formatPrice(price);
-      setupCard.querySelector("[data-signal]").textContent = setup.direction;
-      setupCard.querySelector("[data-signal]").className = "signal-badge " + badgeClass;
-      setupCard.querySelector("[data-entry]").textContent = formatPrice(setup.entry);
-      setupCard.querySelector("[data-sl]").textContent = formatPrice(setup.sl);
-      setupCard.querySelector("[data-tp]").textContent = formatPrice(setup.tp);
-      setupCard.querySelector("[data-successRate]").textContent = `Success Rate: ${setup.successRate.toFixed(0)}%`;
+    const direction = Math.random() > 0.5 ? "BUY" : "SELL";
+    let entry = price, sl, tp;
+    if (direction === "BUY") {
+      sl = price * 0.995;
+      tp = price * 1.002;
+    } else {
+      sl = price * 1.005;
+      tp = price * 0.998;
     }
+
+    const rate = calcSuccessRate(priceHistory[pair.symbol]);
+    setupCard.querySelector("[data-price]").textContent = "$" + price.toFixed(2);
+    setupCard.querySelector("[data-signal]").textContent = direction;
+    setupCard.querySelector("[data-signal]").className = "signal-badge " + (direction === "BUY" ? "buy" : "sell");
+    setupCard.querySelector("[data-entry]").textContent = "$" + entry.toFixed(2);
+    setupCard.querySelector("[data-sl]").textContent = "$" + sl.toFixed(2);
+    setupCard.querySelector("[data-tp]").textContent = "$" + tp.toFixed(2);
+    setupCard.querySelector("[data-rate]").textContent = "Success: " + rate.toFixed(0) + "%";
   });
 }
 </script>
