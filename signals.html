@@ -92,8 +92,23 @@
       font-size: 13px;
       color: #aaaaaa;
       line-height: 1.8;
+      margin-bottom: 12px;
     }
     .signal-info b { color: #ffffff; }
+    .chart-container {
+      width: 100%;
+      height: 300px;
+      background: linear-gradient(to bottom, #0a0e1a, #000);
+      border-radius: 8px;
+      margin-top: 12px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #1e2a45;
+    }
+    .chart-canvas {
+      width: 100%;
+      height: 100%;
+    }
     footer {
       text-align: center;
       padding: 30px;
@@ -101,7 +116,6 @@
       font-size: 12px;
       margin-top: 40px;
     }
-    /* MAINTENANCE MODE STYLES */
     .maintenance-page {
       display: none;
       text-align: center;
@@ -135,16 +149,10 @@
       margin-bottom: 20px;
       line-height: 1.6;
     }
-    .maintenance-status {
-      font-size: 14px;
-      color: #666;
-      margin-top: 30px;
-    }
   </style>
 </head>
 <body>
 
-<!-- MAINTENANCE PAGE -->
 <div class="maintenance-page" id="maintenancePage">
   <div class="maintenance-container">
     <div class="maintenance-icon">⚙️</div>
@@ -153,13 +161,9 @@
       We apologize for this inconvenience.<br/>
       Site is currently under maintenance.
     </div>
-    <div class="maintenance-status">
-      We'll be back online shortly. Thank you for your patience!
-    </div>
   </div>
 </div>
 
-<!-- NORMAL PAGE -->
 <div id="normalPage">
 <header>
   <div class="logo">Lyttes<span>FX.ai</span></div>
@@ -171,8 +175,8 @@
 </header>
 
 <div class="page-title">
-  <h1>📡 Live Signals</h1>
-  <p class="page-subtitle">Real-time prices update every 30 seconds</p>
+  <h1>📡 Live Signals & Candlesticks</h1>
+  <p class="page-subtitle">Real candlestick charts updating every 1 second</p>
 </div>
 
 <div class="signals-grid" id="signals-container"></div>
@@ -184,24 +188,23 @@
 
 <script>
 const pairs = [
-  { name: "BTC/USD", id: "bitcoin", type: "crypto" },
-  { name: "SUI", id: "sui", type: "crypto" },
-  { name: "TON", id: "the-open-network", type: "crypto" },
-  { name: "NZD/USD", id: "NZDUSD", type: "forex" },
-  { name: "GBP/USD", id: "GBPUSD", type: "forex" },
-  { name: "XAU/USD", id: "XAUUSD", type: "forex" }
+  { name: "BNB/USDT", id: "binancecoin" },
+  { name: "ADA/USDT", id: "cardano" },
+  { name: "SOL/USDT", id: "solana" },
+  { name: "XRP/USDT", id: "ripple" },
+  { name: "ETH/USDT", id: "ethereum" }
 ];
 
 let priceHistory = {};
+let candleData = {};
 let prevPrices = {};
-let rsiValues = {};
 
 window.onload = function() {
   checkMaintenance();
   initCards();
   loadSignals();
-  setInterval(loadSignals, 30000);
-  setInterval(checkMaintenance, 5000);
+  setInterval(loadSignals, 1000);
+  setInterval(checkMaintenance, 2000);
 };
 
 function checkMaintenance() {
@@ -221,6 +224,7 @@ function checkMaintenance() {
 function initCards() {
   pairs.forEach(pair => {
     priceHistory[pair.id] = [];
+    candleData[pair.id] = [];
     
     const signalCard = document.createElement("div");
     signalCard.className = "signal-card";
@@ -231,22 +235,63 @@ function initCards() {
       <div class="price-change" data-change style="opacity:0;">+0.00%</div>
       <span class="signal-badge neutral" data-signal>—</span>
       <div class="signal-info" data-info>Loading...</div>
+      <div class="chart-container">
+        <canvas class="chart-canvas" data-chart="${pair.id}"></canvas>
+      </div>
     `;
     document.getElementById("signals-container").appendChild(signalCard);
+  });
+}
+
+function drawCandlesticks(pairId, candles) {
+  const canvas = document.querySelector(`[data-chart="${pairId}"]`);
+  if (!canvas || candles.length < 2) return;
+
+  const ctx = canvas.getContext("2d");
+  const width = canvas.offsetWidth;
+  const height = canvas.offsetHeight;
+
+  ctx.fillStyle = "#0a0e1a";
+  ctx.fillRect(0, 0, width, height);
+
+  const minPrice = Math.min(...candles.map(c => c.low));
+  const maxPrice = Math.max(...candles.map(c => c.high));
+  const range = maxPrice - minPrice || 1;
+
+  const candleWidth = Math.max(8, (width - 40) / candles.length);
+  const spacing = (width - 40) / candles.length;
+
+  candles.forEach((candle, i) => {
+    const x = 20 + i * spacing + spacing / 2;
+    const highY = height - 20 - ((candle.high - minPrice) / range) * (height - 40);
+    const lowY = height - 20 - ((candle.low - minPrice) / range) * (height - 40);
+    const openY = height - 20 - ((candle.open - minPrice) / range) * (height - 40);
+    const closeY = height - 20 - ((candle.close - minPrice) / range) * (height - 40);
+
+    // Wick
+    ctx.strokeStyle = candle.close >= candle.open ? "#00c896" : "#ff4d4d";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, highY);
+    ctx.lineTo(x, lowY);
+    ctx.stroke();
+
+    // Body
+    ctx.fillStyle = candle.close >= candle.open ? "#00c896" : "#ff4d4d";
+    ctx.fillRect(x - candleWidth / 2, Math.min(openY, closeY), candleWidth, Math.abs(closeY - openY) || 1);
   });
 }
 
 function calcRSI(prices) {
   if (prices.length < 2) return 50;
   let gains = 0, losses = 0;
-  for (let i = 1; i < Math.min(prices.length, 14); i++) {
-    const diff = prices[prices.length - i] - prices[prices.length - i - 1];
+  for (let i = Math.max(0, prices.length - 14); i < prices.length - 1; i++) {
+    const diff = prices[i + 1] - prices[i];
     if (diff > 0) gains += diff;
     else losses += Math.abs(diff);
   }
   if (losses === 0) return 100;
-  const rs = gains / losses;
-  return 100 - (100 / (1 + rs));
+  return 100 - (100 / (1 + gains / losses));
 }
 
 function getSignal(price, id) {
@@ -255,53 +300,31 @@ function getSignal(price, id) {
   if (priceHistory[id].length > 20) priceHistory[id].shift();
 
   const rsi = calcRSI(priceHistory[id]);
-  rsiValues[id] = rsi;
-  
   const prev = prevPrices[id];
   const change = prev ? ((price - prev) / prev) * 100 : 0;
 
-  if (rsi < 30 && change > -0.5) return "BUY";
-  if (rsi > 70 && change < 0.5) return "SELL";
-  return "NEUTRAL";
+  if (rsi < 30 && change > -0.5) return { signal: "BUY", rsi };
+  if (rsi > 70 && change < 0.5) return { signal: "SELL", rsi };
+  return { signal: "NEUTRAL", rsi };
 }
 
-function formatPrice(price, type) {
+function formatPrice(price) {
   if (!price) return "—";
-  if (type === "crypto" && price > 100) {
-    return "$" + price.toLocaleString(undefined, { maximumFractionDigits: 2 });
-  }
-  return "$" + parseFloat(price).toFixed(5);
+  return "$" + parseFloat(price).toFixed(2);
 }
 
 async function fetchCryptoPrices() {
   try {
-    const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,sui,the-open-network&vs_currencies=usd");
+    const ids = "binancecoin,cardano,solana,ripple,ethereum";
+    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
     const data = await res.json();
     return {
-      bitcoin: data.bitcoin?.usd,
-      sui: data.sui?.usd,
-      "the-open-network": data["the-open-network"]?.usd
+      binancecoin: data.binancecoin?.usd,
+      cardano: data.cardano?.usd,
+      solana: data.solana?.usd,
+      ripple: data.ripple?.usd,
+      ethereum: data.ethereum?.usd
     };
-  } catch (e) {
-    return {};
-  }
-}
-
-async function fetchForexPrices() {
-  try {
-    const res = await fetch("https://api.exchangerate.host/latest?base=USD&symbols=NZD,GBP");
-    const data = await res.json();
-    const nzd = data.rates?.NZD ? (1 / data.rates.NZD) : null;
-    const gbp = data.rates?.GBP ? (1 / data.rates.GBP) : null;
-    
-    let xau = null;
-    try {
-      const xauRes = await fetch("https://api.metals.live/v1/spot/gold");
-      const xauData = await xauRes.json();
-      xau = xauData.price;
-    } catch (e) {}
-    
-    return { NZDUSD: nzd, GBPUSD: gbp, XAUUSD: xau };
   } catch (e) {
     return {};
   }
@@ -309,37 +332,55 @@ async function fetchForexPrices() {
 
 async function loadSignals() {
   const crypto = await fetchCryptoPrices();
-  const forex = await fetchForexPrices();
-  const allPrices = { ...crypto, ...forex };
 
   pairs.forEach(pair => {
-    const price = allPrices[pair.id];
+    const price = crypto[pair.id];
     const card = document.querySelector(`[data-pair="${pair.id}"]`);
     
     if (!card || !price) return;
 
     const prev = prevPrices[pair.id];
-    const signal = getSignal(price, pair.id);
-    const badgeClass = signal === "BUY" ? "buy" : signal === "SELL" ? "sell" : "neutral";
+    const result = getSignal(price, pair.id);
+    const badgeClass = result.signal === "BUY" ? "buy" : result.signal === "SELL" ? "sell" : "neutral";
     
     const changePercent = prev ? (((price - prev) / prev) * 100).toFixed(2) : "0.00";
     const changeClass = changePercent > 0 ? "up" : changePercent < 0 ? "down" : "up";
     const changeSign = changePercent > 0 ? "+" : "";
 
-    card.querySelector("[data-price]").textContent = formatPrice(price, pair.type);
+    card.querySelector("[data-price]").textContent = formatPrice(price);
     card.querySelector("[data-change]").textContent = changeSign + changePercent + "%";
     card.querySelector("[data-change]").className = "price-change " + changeClass;
     card.querySelector("[data-change]").style.opacity = "1";
     
     const signalBadge = card.querySelector("[data-signal]");
-    signalBadge.textContent = signal;
+    signalBadge.textContent = result.signal;
     signalBadge.className = "signal-badge " + badgeClass;
     
     card.querySelector("[data-info]").innerHTML = `
-      <b>RSI:</b> ${rsiValues[pair.id] ? rsiValues[pair.id].toFixed(1) : "—"} &nbsp;|&nbsp;
-      <b>Interval:</b> 30 Sec &nbsp;|&nbsp;
-      <b>Source:</b> Live Market Data
+      <b>RSI:</b> ${result.rsi.toFixed(1)} | <b>Time:</b> Real-time | <b>Source:</b> Live Data
     `;
+
+    // Create candlestick
+    if (!candleData[pair.id]) candleData[pair.id] = [];
+    const lastCandle = candleData[pair.id][candleData[pair.id].length - 1];
+    
+    if (!lastCandle || Date.now() - lastCandle.time > 5000) {
+      candleData[pair.id].push({
+        open: price,
+        high: price,
+        low: price,
+        close: price,
+        time: Date.now()
+      });
+    } else {
+      lastCandle.high = Math.max(lastCandle.high, price);
+      lastCandle.low = Math.min(lastCandle.low, price);
+      lastCandle.close = price;
+    }
+
+    if (candleData[pair.id].length > 40) candleData[pair.id].shift();
+
+    drawCandlesticks(pair.id, candleData[pair.id]);
 
     prevPrices[pair.id] = price;
   });
