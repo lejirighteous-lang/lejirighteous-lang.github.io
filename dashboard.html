@@ -217,7 +217,7 @@
 <div id="setups-page" class="hidden">
   <div class="page-title">
     <h1>📊 Trading Setups</h1>
-    <p class="page-subtitle">Updates every 5 minutes • Entry, Stop Loss & Take Profit</p>
+    <p class="page-subtitle">Realistic $10-20 profit targets • Updated every 5 minutes</p>
   </div>
   <div class="content" id="setups-container"></div>
 </div>
@@ -238,7 +238,6 @@ const pairs = [
 
 let priceHistory = {};
 let prevPrices = {};
-let cardsInitialized = false;
 
 window.onload = function() {
   const user = localStorage.getItem("lyttesfx_user");
@@ -265,13 +264,9 @@ function handleLogout() {
 }
 
 function initCards() {
-  if (cardsInitialized) return;
-  cardsInitialized = true;
-
   pairs.forEach(pair => {
     priceHistory[pair.id] = [Math.random() * 100];
 
-    // Create signal card
     const signalCard = document.createElement("div");
     signalCard.className = "signal-card";
     signalCard.setAttribute("data-pair", pair.id);
@@ -287,7 +282,6 @@ function initCards() {
     `;
     document.getElementById("signals-container").appendChild(signalCard);
 
-    // Create setup card
     const setupCard = document.createElement("div");
     setupCard.className = "setup-card";
     setupCard.setAttribute("data-setup", pair.id);
@@ -336,7 +330,6 @@ function drawChart(pairId, prices) {
     pathData += ` L ${x} ${y}`;
   }
 
-  // Gradient fill
   const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
   const grad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
   grad.setAttribute("id", "g" + pairId);
@@ -358,13 +351,11 @@ function drawChart(pairId, prices) {
   defs.appendChild(grad);
   svg.appendChild(defs);
 
-  // Area
   const area = document.createElementNS("http://www.w3.org/2000/svg", "path");
   area.setAttribute("d", pathData + ` L ${width - padding} ${height - padding} L ${padding} ${height - padding} Z`);
   area.setAttribute("fill", "url(#g" + pairId + ")");
   svg.appendChild(area);
 
-  // Line
   const line = document.createElementNS("http://www.w3.org/2000/svg", "path");
   line.setAttribute("d", pathData);
   line.setAttribute("stroke", "#00c896");
@@ -375,7 +366,6 @@ function drawChart(pairId, prices) {
   line.style.filter = "drop-shadow(0 0 4px rgba(0, 200, 150, 0.5))";
   svg.appendChild(line);
 
-  // Points
   for (let i = 0; i < prices.length; i++) {
     const x = padding + i * pointSpacing;
     const y = height - padding - ((prices[i] - minPrice) / range) * (height - padding * 2);
@@ -431,6 +421,41 @@ function formatPrice(price, type) {
   return "$" + parseFloat(price).toFixed(5);
 }
 
+function calcRealisticSetup(price, type) {
+  if (!price) return null;
+
+  const direction = Math.random() > 0.5 ? "BUY" : "SELL";
+  let entry, sl, tp, profit;
+
+  if (type === "crypto") {
+    if (direction === "BUY") {
+      entry = price;
+      sl = price * 0.995;
+      tp = price * 1.002;
+      profit = (tp - entry) * 0.1;
+    } else {
+      entry = price;
+      sl = price * 1.005;
+      tp = price * 0.998;
+      profit = (entry - tp) * 0.1;
+    }
+  } else {
+    if (direction === "BUY") {
+      entry = price;
+      sl = price * 0.9995;
+      tp = price * 1.0005;
+      profit = (tp - entry) * 100;
+    } else {
+      entry = price;
+      sl = price * 1.0005;
+      tp = price * 0.9995;
+      profit = (entry - tp) * 100;
+    }
+  }
+
+  return { direction, entry, sl, tp, profit };
+}
+
 async function loadData() {
   const crypto = await fetchCryptoPrices();
   const forex = await fetchForexPrices();
@@ -441,7 +466,6 @@ async function loadData() {
     
     if (!price) return;
 
-    // Update signals
     const card = document.querySelector(`[data-pair="${pair.id}"]`);
     if (card) {
       const prev = prevPrices[pair.id];
@@ -453,43 +477,26 @@ async function loadData() {
       card.querySelector("[data-change]").textContent = changeSign + changePercent + "%";
       card.querySelector("[data-change]").className = "price-change " + changeClass;
 
-      // Add to price history
       priceHistory[pair.id].push(price);
       if (priceHistory[pair.id].length > 40) priceHistory[pair.id].shift();
 
-      // Draw chart
       drawChart(pair.id, priceHistory[pair.id]);
 
       prevPrices[pair.id] = price;
     }
 
-    // Update setups
     const setupCard = document.querySelector(`[data-setup="${pair.id}"]`);
     if (setupCard) {
-      const isForex = pair.type === "forex";
-      const slPct = isForex ? 0.003 : 0.02;
-      const tpPct = isForex ? 0.006 : 0.04;
-
-      const direction = Math.random() > 0.5 ? "BUY" : "SELL";
-      let entry, sl, tp;
-
-      if (direction === "BUY") {
-        entry = price;
-        sl = price * (1 - slPct);
-        tp = price * (1 + tpPct);
-      } else {
-        entry = price;
-        sl = price * (1 + slPct);
-        tp = price * (1 - tpPct);
+      const setup = calcRealisticSetup(price, pair.type);
+      if (setup) {
+        const badgeClass = setup.direction === "BUY" ? "buy" : "sell";
+        setupCard.querySelector("[data-price]").textContent = formatPrice(price, pair.type);
+        setupCard.querySelector("[data-signal]").textContent = setup.direction;
+        setupCard.querySelector("[data-signal]").className = "signal-badge " + badgeClass;
+        setupCard.querySelector("[data-entry]").textContent = formatPrice(setup.entry, pair.type);
+        setupCard.querySelector("[data-sl]").textContent = formatPrice(setup.sl, pair.type);
+        setupCard.querySelector("[data-tp]").textContent = formatPrice(setup.tp, pair.type);
       }
-
-      const badgeClass = direction === "BUY" ? "buy" : "sell";
-      setupCard.querySelector("[data-price]").textContent = formatPrice(price, pair.type);
-      setupCard.querySelector("[data-signal]").textContent = direction;
-      setupCard.querySelector("[data-signal]").className = "signal-badge " + badgeClass;
-      setupCard.querySelector("[data-entry]").textContent = formatPrice(entry, pair.type);
-      setupCard.querySelector("[data-sl]").textContent = formatPrice(sl, pair.type);
-      setupCard.querySelector("[data-tp]").textContent = formatPrice(tp, pair.type);
     }
   });
 }
