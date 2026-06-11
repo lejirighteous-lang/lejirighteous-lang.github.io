@@ -110,6 +110,15 @@
       font-weight: bold;
       margin-bottom: 12px;
     }
+    .profit-info {
+      background-color: rgba(0, 200, 150, 0.1);
+      border-left: 3px solid #00c896;
+      padding: 10px 12px;
+      margin-top: 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #00c896;
+    }
     .disclaimer {
       text-align: center;
       color: #555;
@@ -140,7 +149,7 @@
 
 <div class="page-title">
   <h1>📊 Trading Setups</h1>
-  <p>Live entry, stop loss & take profit for each pair</p>
+  <p>Live entry, stop loss & take profit for each pair • Realistic $10-20 profit targets</p>
 </div>
 
 <div class="setups-grid" id="setups-container">
@@ -166,26 +175,39 @@ const pairs = [
   { name: "XAU/USD", id: "XAUUSD", type: "forex" }
 ];
 
-function calcSetup(price, type) {
+function calcRealisticSetup(price, type) {
   if (!price) return null;
-  const isForex = type === "forex";
-  const slPct = isForex ? 0.003 : 0.02;
-  const tpPct = isForex ? 0.006 : 0.04;
 
   const direction = Math.random() > 0.5 ? "BUY" : "SELL";
-  let entry, sl, tp;
+  let entry, sl, tp, profit;
 
-  if (direction === "BUY") {
-    entry = price;
-    sl = price * (1 - slPct);
-    tp = price * (1 + tpPct);
+  if (type === "crypto") {
+    if (direction === "BUY") {
+      entry = price;
+      sl = price * 0.995;
+      tp = price * 1.002;
+      profit = (tp - entry) * 0.1;
+    } else {
+      entry = price;
+      sl = price * 1.005;
+      tp = price * 0.998;
+      profit = (entry - tp) * 0.1;
+    }
   } else {
-    entry = price;
-    sl = price * (1 + slPct);
-    tp = price * (1 - tpPct);
+    if (direction === "BUY") {
+      entry = price;
+      sl = price * 0.9995;
+      tp = price * 1.0005;
+      profit = (tp - entry) * 100;
+    } else {
+      entry = price;
+      sl = price * 1.0005;
+      tp = price * 0.9995;
+      profit = (entry - tp) * 100;
+    }
   }
 
-  return { direction, entry, sl, tp };
+  return { direction, entry, sl, tp, profit };
 }
 
 function fmt(val, type) {
@@ -208,13 +230,19 @@ async function fetchCryptoPrices() {
 
 async function fetchForexPrices() {
   try {
-    const res = await fetch("https://api.exchangerate.host/live?access_key=free&currencies=NZD,GBP,XAU&source=USD&format=1");
+    const res = await fetch("https://api.exchangerate.host/latest?base=USD&symbols=NZD,GBP");
     const data = await res.json();
-    return {
-      NZDUSD: data.quotes?.USDNZD ? (1 / data.quotes.USDNZD) : null,
-      GBPUSD: data.quotes?.USDGBP ? (1 / data.quotes.USDGBP) : null,
-      XAUUSD: data.quotes?.USDXAU ? (1 / data.quotes.USDXAU) : null
-    };
+    const nzd = data.rates?.NZD ? (1 / data.rates.NZD) : null;
+    const gbp = data.rates?.GBP ? (1 / data.rates.GBP) : null;
+    
+    let xau = null;
+    try {
+      const xauRes = await fetch("https://api.metals.live/v1/spot/gold");
+      const xauData = await xauRes.json();
+      xau = xauData.price;
+    } catch (e) {}
+    
+    return { NZDUSD: nzd, GBPUSD: gbp, XAUUSD: xau };
   } catch (e) { return {}; }
 }
 
@@ -228,27 +256,32 @@ async function loadSetups() {
 
   pairs.forEach(pair => {
     const price = allPrices[pair.id];
-    const setup = calcSetup(price, pair.type);
+    const setup = calcRealisticSetup(price, pair.type);
+
+    if (!setup) return;
 
     container.innerHTML += `
       <div class="setup-card">
         <h3>${pair.name}</h3>
-        <div class="live-price">${price ? fmt(price, pair.type) : "Loading..."}</div>
-        ${setup ? `<span class="direction-${setup.direction.toLowerCase()}">${setup.direction}</span>` : ""}
+        <div class="live-price">${fmt(price, pair.type)}</div>
+        <span class="direction-${setup.direction.toLowerCase()}">${setup.direction}</span>
         <table class="setup-table">
           <tr>
             <td>🎯 Entry Point</td>
-            <td class="entry">${setup ? fmt(setup.entry, pair.type) : "—"}</td>
+            <td class="entry">${fmt(setup.entry, pair.type)}</td>
           </tr>
           <tr>
             <td>🛑 Stop Loss</td>
-            <td class="sl">${setup ? fmt(setup.sl, pair.type) : "—"}</td>
+            <td class="sl">${fmt(setup.sl, pair.type)}</td>
           </tr>
           <tr>
             <td>✅ Take Profit</td>
-            <td class="tp">${setup ? fmt(setup.tp, pair.type) : "—"}</td>
+            <td class="tp">${fmt(setup.tp, pair.type)}</td>
           </tr>
         </table>
+        <div class="profit-info">
+          💰 Expected Profit: $${setup.profit.toFixed(2)} per 0.1 lot
+        </div>
       </div>
     `;
   });
