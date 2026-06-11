@@ -222,7 +222,7 @@
 
 <div class="maintenance-page" id="maintenancePage">
   <div class="maintenance-container">
-    <div class="maintenance-icon">⚙️</div>
+    <div class="maintenance-icon">⚙</div>
     <div class="maintenance-title">Under Maintenance</div>
     <div class="maintenance-message">
       We apologize for this inconvenience.<br/>
@@ -401,18 +401,19 @@ function drawCandlesticks(symbol, candles) {
   });
 }
 
-async function fetchBinancePrices() {
+async function getPrices() {
   try {
-    const symbols = pairs.map(p => p.symbol).join(',');
-    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbols=["${symbols.split(',').join('","')}"]`);
-    const data = await res.json();
+    const urls = pairs.map(p => `https://api.coingecko.com/api/v3/simple/price?ids=${p.symbol.toLowerCase().replace('usdt', '')}&vs_currencies=usd`);
+    const responses = await Promise.all(urls.map(url => fetch(url).then(r => r.json()).catch(() => ({}))));
+    
     const prices = {};
-    data.forEach(item => {
-      prices[item.symbol] = parseFloat(item.price);
+    pairs.forEach((pair, idx) => {
+      const key = pair.symbol.toLowerCase().replace('usdt', '');
+      const data = responses[idx][key];
+      prices[pair.symbol] = data ? data.usd : null;
     });
     return prices;
   } catch (e) {
-    console.error('Binance API error:', e);
     return {};
   }
 }
@@ -434,7 +435,7 @@ function calcSuccessRate(prices) {
 }
 
 async function loadData() {
-  const prices = await fetchBinancePrices();
+  const prices = await getPrices();
 
   pairs.forEach(pair => {
     const price = prices[pair.symbol];
@@ -469,7 +470,7 @@ async function loadData() {
 }
 
 async function loadSetups() {
-  const prices = await fetchBinancePrices();
+  const prices = await getPrices();
 
   pairs.forEach(pair => {
     const price = prices[pair.symbol];
