@@ -14,16 +14,56 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
     }
+    .maintenance-page {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a0e1a 0%, #0d1226 100%);
+      width: 100%;
+    }
+    .maintenance-container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+    .maintenance-title {
+      font-size: 36px;
+      color: #00c896;
+      margin-bottom: 20px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(0, 200, 150, 0.5);
+    }
+    .maintenance-icon {
+      font-size: 80px;
+      margin-bottom: 30px;
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .maintenance-message {
+      font-size: 18px;
+      color: #aaaaaa;
+      margin-bottom: 20px;
+      line-height: 1.8;
+    }
+    .maintenance-status {
+      font-size: 14px;
+      color: #666;
+      margin-top: 30px;
+    }
+
     .login-container {
       background-color: #0d1226;
       border: 1px solid #1e2a45;
-      border-radius: 15px;
+      border-radius: 12px;
       padding: 40px;
       max-width: 400px;
       width: 100%;
-      box-shadow: 0 10px 40px rgba(0, 200, 150, 0.1);
     }
     .logo {
       text-align: center;
@@ -36,184 +76,133 @@
     .form-group {
       margin-bottom: 20px;
     }
-    label {
+    .form-group label {
       display: block;
-      margin-bottom: 8px;
       color: #aaaaaa;
       font-size: 13px;
-      font-weight: bold;
+      margin-bottom: 8px;
     }
-    input {
+    .form-group input {
       width: 100%;
       padding: 12px;
-      border: 1px solid #1e2a45;
-      border-radius: 8px;
       background-color: #0a0e1a;
+      border: 1px solid #1e2a45;
+      border-radius: 6px;
       color: #ffffff;
       font-size: 14px;
     }
-    input:focus {
+    .form-group input:focus {
       outline: none;
       border-color: #00c896;
-      box-shadow: 0 0 10px rgba(0, 200, 150, 0.3);
     }
-    .btn-group {
+    .form-tabs {
       display: flex;
       gap: 10px;
-      margin-top: 25px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #1e2a45;
     }
-    button {
+    .form-tab {
       flex: 1;
       padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
+      text-align: center;
+      color: #aaaaaa;
       cursor: pointer;
-      font-size: 14px;
+      border-bottom: 2px solid transparent;
+      font-weight: bold;
+    }
+    .form-tab.active {
+      color: #00c896;
+      border-bottom-color: #00c896;
+    }
+    .form-section {
+      display: none;
+    }
+    .form-section.active {
+      display: block;
     }
     .btn-login {
+      width: 100%;
+      padding: 12px;
       background-color: #00c896;
       color: #000;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 14px;
+      cursor: pointer;
     }
-    .btn-login:hover {
-      background-color: #00b080;
-    }
-    .btn-signup {
-      background-color: #1e2a45;
-      color: #00c896;
-      border: 1px solid #00c896;
-    }
-    .btn-signup:hover {
-      background-color: #2a3a55;
-    }
+    .btn-login:hover { background-color: #00a877; }
     .error {
       color: #ff4d4d;
       font-size: 13px;
-      margin-top: 5px;
-      display: none;
-    }
-    .toggle-mode {
+      margin-top: 10px;
       text-align: center;
-      margin-top: 20px;
-      font-size: 13px;
-      color: #aaaaaa;
-    }
-    .toggle-mode a {
-      color: #00c896;
-      text-decoration: none;
-      cursor: pointer;
-    }
-    /* MAINTENANCE MODE STYLES */
-    .maintenance-page {
-      display: none;
-      text-align: center;
-      padding: 40px 20px;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #0a0e1a 0%, #0d1226 100%);
-    }
-    .maintenance-container {
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 40px;
-    }
-    .maintenance-icon {
-      font-size: 80px;
-      margin-bottom: 30px;
-      animation: spin 2s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .maintenance-title {
-      font-size: 32px;
-      color: #00c896;
-      margin-bottom: 15px;
-      font-weight: bold;
-    }
-    .maintenance-message {
-      font-size: 18px;
-      color: #aaaaaa;
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-    .maintenance-status {
-      font-size: 14px;
-      color: #666;
-      margin-top: 30px;
     }
   </style>
 </head>
 <body>
 
-<!-- MAINTENANCE PAGE -->
 <div class="maintenance-page" id="maintenancePage">
   <div class="maintenance-container">
     <div class="maintenance-icon">⚙️</div>
-    <div class="maintenance-title">Under Maintenance</div>
+    <div class="maintenance-title">LYTTESFX.AI</div>
     <div class="maintenance-message">
-      We apologize for this inconvenience.<br/>
-      Site is currently under maintenance.
+      We apologize for the inconvenience.<br/>
+      Site will be back soon.
     </div>
     <div class="maintenance-status">
-      We'll be back online shortly. Thank you for your patience!
+      Thank you for your patience!
     </div>
   </div>
 </div>
 
-<!-- LOGIN PAGE -->
-<div class="login-container" id="loginContainer">
+<div id="loginContainer">
+<div class="login-container">
   <div class="logo">Lyttes<span>FX.ai</span></div>
   
-  <div id="loginForm">
-    <h2 style="text-align:center; font-size:20px; margin-bottom:30px; color:#fff;">Sign In</h2>
-    <div class="form-group">
-      <label>Username</label>
-      <input type="text" id="loginUsername" placeholder="Enter username">
-      <div class="error" id="loginError"></div>
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="loginPassword" placeholder="Enter password">
-    </div>
-    <div class="btn-group">
-      <button class="btn-login" onclick="handleLogin()">Sign In</button>
-      <button class="btn-signup" onclick="toggleMode()">Sign Up</button>
-    </div>
-    <div class="toggle-mode">
-      Don't have an account? <a onclick="toggleMode()">Create one</a>
-    </div>
+  <div class="form-tabs">
+    <div class="form-tab active" onclick="switchTab('login')">Login</div>
+    <div class="form-tab" onclick="switchTab('signup')">Sign Up</div>
   </div>
 
-  <div id="signupForm" style="display:none;">
-    <h2 style="text-align:center; font-size:20px; margin-bottom:30px; color:#fff;">Create Account</h2>
+  <!-- LOGIN FORM -->
+  <div id="login-form" class="form-section active">
     <div class="form-group">
       <label>Username</label>
-      <input type="text" id="signupUsername" placeholder="Choose username">
-      <div class="error" id="signupError"></div>
+      <input type="text" id="login-username" placeholder="Enter username">
     </div>
     <div class="form-group">
       <label>Password</label>
-      <input type="password" id="signupPassword" placeholder="Create password">
+      <input type="password" id="login-password" placeholder="Enter password">
+    </div>
+    <button class="btn-login" onclick="handleLogin()">Login</button>
+    <div class="error" id="login-error"></div>
+  </div>
+
+  <!-- SIGNUP FORM -->
+  <div id="signup-form" class="form-section">
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="signup-username" placeholder="Choose username">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="signup-password" placeholder="Create password">
     </div>
     <div class="form-group">
       <label>Confirm Password</label>
-      <input type="password" id="signupConfirm" placeholder="Confirm password">
+      <input type="password" id="signup-confirm" placeholder="Confirm password">
     </div>
-    <div class="btn-group">
-      <button class="btn-login" onclick="handleSignup()">Create Account</button>
-      <button class="btn-signup" onclick="toggleMode()">Back to Login</button>
-    </div>
-    <div class="toggle-mode">
-      Already have an account? <a onclick="toggleMode()">Sign in</a>
-    </div>
+    <button class="btn-login" onclick="handleSignup()">Sign Up</button>
+    <div class="error" id="signup-error"></div>
   </div>
+</div>
 </div>
 
 <script>
-// CHECK MAINTENANCE MODE FIRST
 window.onload = function() {
   checkMaintenance();
+  setInterval(checkMaintenance, 2000);
 };
 
 function checkMaintenance() {
@@ -228,90 +217,72 @@ function checkMaintenance() {
     maintenancePage.style.display = "none";
     loginContainer.style.display = "block";
   }
-};
-
-function toggleMode() {
-  document.getElementById("loginForm").style.display = document.getElementById("loginForm").style.display === "none" ? "block" : "none";
-  document.getElementById("signupForm").style.display = document.getElementById("signupForm").style.display === "none" ? "block" : "none";
 }
 
-function getAllUsers() {
-  const users = localStorage.getItem("lyttesfx_users");
-  return users ? JSON.parse(users) : {};
-}
-
-function saveUsers(users) {
-  localStorage.setItem("lyttesfx_users", JSON.stringify(users));
+function switchTab(tab) {
+  document.querySelectorAll(".form-tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".form-section").forEach(s => s.classList.remove("active"));
+  
+  if (tab === "login") {
+    document.querySelectorAll(".form-tab")[0].classList.add("active");
+    document.getElementById("login-form").classList.add("active");
+  } else {
+    document.querySelectorAll(".form-tab")[1].classList.add("active");
+    document.getElementById("signup-form").classList.add("active");
+  }
 }
 
 function handleLogin() {
-  const username = document.getElementById("loginUsername").value.trim();
-  const password = document.getElementById("loginPassword").value;
-  const errorEl = document.getElementById("loginError");
+  const username = document.getElementById("login-username").value.trim();
+  const password = document.getElementById("login-password").value.trim();
+  const errorEl = document.getElementById("login-error");
 
   if (!username || !password) {
     errorEl.textContent = "Username and password required";
-    errorEl.style.display = "block";
     return;
   }
 
-  if (username === "admin" && password === "Righteous$&@2010") {
-    localStorage.setItem("lyttesfx_user", "admin");
-    window.location.href = "admin.html";
-    return;
-  }
-
-  const users = getAllUsers();
+  const users = JSON.parse(localStorage.getItem("lyttesfx_users") || "{}");
   if (users[username] && users[username].password === password) {
     localStorage.setItem("lyttesfx_user", username);
     window.location.href = "dashboard.html";
   } else {
     errorEl.textContent = "Invalid username or password";
-    errorEl.style.display = "block";
   }
 }
 
 function handleSignup() {
-  const username = document.getElementById("signupUsername").value.trim();
-  const password = document.getElementById("signupPassword").value;
-  const confirm = document.getElementById("signupConfirm").value;
-  const errorEl = document.getElementById("signupError");
+  const username = document.getElementById("signup-username").value.trim();
+  const password = document.getElementById("signup-password").value.trim();
+  const confirm = document.getElementById("signup-confirm").value.trim();
+  const errorEl = document.getElementById("signup-error");
 
   if (!username || !password || !confirm) {
     errorEl.textContent = "All fields required";
-    errorEl.style.display = "block";
     return;
   }
 
   if (password !== confirm) {
-    errorEl.textContent = "Passwords don't match";
-    errorEl.style.display = "block";
+    errorEl.textContent = "Passwords do not match";
     return;
   }
 
   if (password.length < 6) {
     errorEl.textContent = "Password must be at least 6 characters";
-    errorEl.style.display = "block";
     return;
   }
 
-  const users = getAllUsers();
+  const users = JSON.parse(localStorage.getItem("lyttesfx_users") || "{}");
   if (users[username]) {
     errorEl.textContent = "Username already exists";
-    errorEl.style.display = "block";
     return;
   }
 
-  users[username] = { password: password, createdAt: new Date().toISOString() };
-  saveUsers(users);
-
-  errorEl.style.display = "none";
+  users[username] = { password, createdAt: new Date().toISOString() };
+  localStorage.setItem("lyttesfx_users", JSON.stringify(users));
   localStorage.setItem("lyttesfx_user", username);
   window.location.href = "dashboard.html";
 }
-
-// Check maintenance mode every 5 seconds in case it's toggled
-setInterval(checkMaintenance, 5000);
 </script>
 
 </body>
