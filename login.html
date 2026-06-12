@@ -35,14 +35,6 @@
       margin: 0 auto;
       padding: 40px;
     }
-    .maintenance-title {
-      font-size: 36px;
-      color: #00c896;
-      margin-bottom: 20px;
-      font-weight: bold;
-      letter-spacing: 3px;
-      text-shadow: 0 0 10px rgba(0, 200, 150, 0.5);
-    }
     .maintenance-icon {
       font-size: 80px;
       margin-bottom: 30px;
@@ -52,18 +44,20 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    .maintenance-title {
+      font-size: 36px;
+      color: #00c896;
+      margin-bottom: 20px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(0, 200, 150, 0.5);
+    }
     .maintenance-message {
       font-size: 18px;
       color: #aaaaaa;
       margin-bottom: 20px;
       line-height: 1.8;
     }
-    .maintenance-status {
-      font-size: 14px;
-      color: #666;
-      margin-top: 30px;
-    }
-
     .login-container {
       background-color: #0d1226;
       border: 1px solid #1e2a45;
@@ -157,9 +151,6 @@
       We apologize for the inconvenience.<br/>
       Site will be back soon.
     </div>
-    <div class="maintenance-status">
-      Thank you for your patience!
-    </div>
   </div>
 </div>
 
@@ -172,7 +163,6 @@
     <div class="form-tab" onclick="switchTab('signup')">Sign Up</div>
   </div>
 
-  <!-- LOGIN FORM -->
   <div id="login-form" class="form-section active">
     <div class="form-group">
       <label>Username</label>
@@ -186,7 +176,6 @@
     <div class="error" id="login-error"></div>
   </div>
 
-  <!-- SIGNUP FORM -->
   <div id="signup-form" class="form-section">
     <div class="form-group">
       <label>Username</label>
@@ -207,58 +196,37 @@
 </div>
 
 <script>
-// PREVENT CACHING
-if ('caches' in window) {
-  caches.keys().then(function(cacheNames) {
-    cacheNames.forEach(function(cacheName) {
-      caches.delete(cacheName);
-    });
-  });
-}
-
-window.onload = function() {
-  // CHECK MAINTENANCE IMMEDIATELY ON PAGE LOAD
-  checkMaintenanceNow();
-  
-  // CHECK EVERY 500ms TO CATCH CHANGES
-  setInterval(checkMaintenanceNow, 500);
-};
-
-function checkMaintenanceNow() {
-  // Force refresh from localStorage (not cached)
-  const maintenanceMode = localStorage.getItem("lyttesfx_maintenance");
-  const isMaintenance = maintenanceMode === "true";
-  
-  const maintenancePage = document.getElementById("maintenancePage");
-  const loginContainer = document.getElementById("loginContainer");
-
-  if (isMaintenance) {
-    maintenancePage.style.display = "flex";
-    loginContainer.style.display = "none";
-    // Disable all form inputs
-    document.querySelectorAll("input").forEach(input => {
-      input.disabled = true;
-    });
-    document.querySelectorAll("button").forEach(button => {
-      button.disabled = true;
-    });
-  } else {
-    maintenancePage.style.display = "none";
-    loginContainer.style.display = "block";
-    // Enable all form inputs
-    document.querySelectorAll("input").forEach(input => {
-      input.disabled = false;
-    });
-    document.querySelectorAll("button").forEach(button => {
-      button.disabled = false;
-    });
+async function checkMaintenance() {
+  try {
+    const response = await fetch('.maintenance', { method: 'HEAD' });
+    return response.ok;
+  } catch (e) {
+    return false;
   }
 }
+
+window.onload = async function() {
+  const isMaintenance = await checkMaintenance();
+  if (isMaintenance) {
+    document.getElementById("maintenancePage").style.display = "flex";
+    document.getElementById("loginContainer").style.display = "none";
+  }
+  
+  setInterval(async function() {
+    const maintenance = await checkMaintenance();
+    if (maintenance) {
+      document.getElementById("maintenancePage").style.display = "flex";
+      document.getElementById("loginContainer").style.display = "none";
+    } else {
+      document.getElementById("maintenancePage").style.display = "none";
+      document.getElementById("loginContainer").style.display = "block";
+    }
+  }, 500);
+};
 
 function switchTab(tab) {
   document.querySelectorAll(".form-tab").forEach(t => t.classList.remove("active"));
   document.querySelectorAll(".form-section").forEach(s => s.classList.remove("active"));
-  
   if (tab === "login") {
     document.querySelectorAll(".form-tab")[0].classList.add("active");
     document.getElementById("login-form").classList.add("active");
@@ -269,12 +237,6 @@ function switchTab(tab) {
 }
 
 function handleLogin() {
-  const isMaintenance = localStorage.getItem("lyttesfx_maintenance") === "true";
-  if (isMaintenance) {
-    document.getElementById("login-error").textContent = "Site is under maintenance";
-    return;
-  }
-
   const username = document.getElementById("login-username").value.trim();
   const password = document.getElementById("login-password").value.trim();
   const errorEl = document.getElementById("login-error");
@@ -294,12 +256,6 @@ function handleLogin() {
 }
 
 function handleSignup() {
-  const isMaintenance = localStorage.getItem("lyttesfx_maintenance") === "true";
-  if (isMaintenance) {
-    document.getElementById("signup-error").textContent = "Site is under maintenance";
-    return;
-  }
-
   const username = document.getElementById("signup-username").value.trim();
   const password = document.getElementById("signup-password").value.trim();
   const confirm = document.getElementById("signup-confirm").value.trim();
