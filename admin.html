@@ -36,47 +36,45 @@
     }
     .btn-logout:hover { background-color: #cc0000; }
     .container {
-      max-width: 600px;
-      margin: 50px auto;
+      max-width: 900px;
+      margin: 30px auto;
       padding: 0 20px;
     }
-    .admin-panel {
-      background-color: #0d1226;
-      border: 1px solid #1e2a45;
-      border-radius: 15px;
-      padding: 40px;
+    .page-title {
+      text-align: center;
+      margin-bottom: 40px;
     }
-    .admin-panel h1 {
-      font-size: 28px;
+    .page-title h1 {
+      font-size: 32px;
       color: #00c896;
       margin-bottom: 10px;
-      text-align: center;
     }
-    .admin-panel p {
+    .page-subtitle {
       color: #aaaaaa;
-      text-align: center;
-      margin-bottom: 30px;
       font-size: 14px;
     }
-    .control-section {
+    .section {
+      background-color: #0d1226;
+      border: 1px solid #1e2a45;
+      border-radius: 12px;
+      padding: 30px;
       margin-bottom: 30px;
-      padding-bottom: 30px;
+    }
+    .section h2 {
+      font-size: 20px;
+      color: #00c896;
+      margin-bottom: 20px;
       border-bottom: 1px solid #1e2a45;
+      padding-bottom: 10px;
     }
-    .control-section:last-child {
-      border-bottom: none;
+    .control-group {
+      margin-bottom: 25px;
     }
-    .control-title {
-      font-size: 18px;
-      color: #ffffff;
-      margin-bottom: 15px;
-      font-weight: bold;
-    }
-    .control-description {
+    .control-label {
       color: #aaaaaa;
-      font-size: 13px;
-      margin-bottom: 12px;
-      line-height: 1.5;
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: block;
     }
     .toggle-switch {
       display: flex;
@@ -87,7 +85,7 @@
       position: relative;
       display: inline-block;
       width: 60px;
-      height: 30px;
+      height: 34px;
     }
     .switch input {
       opacity: 0;
@@ -101,41 +99,75 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #1e2a45;
-      transition: 0.3s;
-      border-radius: 30px;
+      background-color: #444;
+      transition: 0.4s;
+      border-radius: 34px;
     }
     .slider:before {
       position: absolute;
       content: "";
-      height: 22px;
-      width: 22px;
+      height: 26px;
+      width: 26px;
       left: 4px;
       bottom: 4px;
-      background-color: #ffffff;
-      transition: 0.3s;
+      background-color: white;
+      transition: 0.4s;
       border-radius: 50%;
     }
     input:checked + .slider {
       background-color: #00c896;
     }
     input:checked + .slider:before {
-      transform: translateX(30px);
+      transform: translateX(26px);
     }
-    .status {
-      font-size: 13px;
+    .status-text {
       color: #aaaaaa;
+      font-size: 13px;
     }
-    .status.active {
+    .status-text.active {
+      color: #00c896;
+      font-weight: bold;
+    }
+    .timer-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .timer-btn {
+      padding: 10px;
+      background-color: #0a0e1a;
+      border: 1px solid #1e2a45;
+      color: #aaaaaa;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: 0.3s;
+    }
+    .timer-btn:hover {
+      border-color: #00c896;
       color: #00c896;
     }
-    .status.inactive {
-      color: #ff4d4d;
+    .timer-btn.active {
+      background-color: #00c896;
+      color: #000;
+      border-color: #00c896;
     }
-    .user-list {
-      background-color: #000;
-      border: 1px solid #1e2a45;
-      border-radius: 8px;
+    .timer-display {
+      margin-top: 15px;
+      padding: 15px;
+      background-color: #0a0e1a;
+      border-radius: 6px;
+      text-align: center;
+      color: #00c896;
+      font-weight: bold;
+    }
+    .users-section {
+      margin-top: 20px;
+    }
+    .users-list {
+      background-color: #0a0e1a;
+      border-radius: 6px;
       padding: 15px;
       max-height: 300px;
       overflow-y: auto;
@@ -145,64 +177,16 @@
       border-bottom: 1px solid #1e2a45;
       font-size: 13px;
       color: #aaaaaa;
-      display: flex;
-      justify-content: space-between;
     }
     .user-item:last-child {
       border-bottom: none;
     }
-    .user-badge {
-      background-color: #1e2a45;
-      color: #00c896;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-    }
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-    .btn {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    .btn-primary {
-      background-color: #00c896;
-      color: #000;
-    }
-    .btn-primary:hover {
-      background-color: #00b080;
-    }
-    .btn-secondary {
-      background-color: #1e2a45;
-      color: #00c896;
-      border: 1px solid #00c896;
-    }
-    .btn-secondary:hover {
-      background-color: #2a3a55;
-    }
-    .alert {
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-size: 13px;
-      display: none;
-    }
-    .alert.success {
-      background-color: rgba(0, 200, 150, 0.2);
-      border: 1px solid #00c896;
-      color: #00c896;
-    }
-    .alert.warning {
-      background-color: rgba(255, 77, 77, 0.2);
-      border: 1px solid #ff4d4d;
-      color: #ff4d4d;
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #444;
+      font-size: 12px;
+      margin-top: 40px;
     }
   </style>
 </head>
@@ -214,192 +198,287 @@
 </header>
 
 <div class="container">
-  <div id="loginForm">
-    <div class="admin-panel">
-      <h1>🔐 Admin Access</h1>
-      <p>Enter your credentials to access the admin panel</p>
-      
-      <div class="form-group" style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 8px; color: #aaaaaa; font-size: 13px;">Username</label>
-        <input type="text" id="adminUsername" placeholder="Enter admin username" style="width: 100%; padding: 12px; border: 1px solid #1e2a45; border-radius: 8px; background-color: #0a0e1a; color: #fff;">
+  <div class="page-title">
+    <h1>⚙️ Admin Control Panel</h1>
+    <p class="page-subtitle">Manage site maintenance and system settings</p>
+  </div>
+
+  <!-- SITE MAINTENANCE -->
+  <div class="section">
+    <h2>🌐 Site Maintenance</h2>
+    <div class="control-group">
+      <label class="control-label">Enable Site Maintenance (blocks everything)</label>
+      <div class="toggle-switch">
+        <label class="switch">
+          <input type="checkbox" id="site-maintenance" onchange="toggleSiteMaintenance()">
+          <span class="slider"></span>
+        </label>
+        <span class="status-text" id="site-status">Off</span>
       </div>
-
-      <div class="form-group" style="margin-bottom: 20px;">
-        <label style="display: block; margin-bottom: 8px; color: #aaaaaa; font-size: 13px;">Password</label>
-        <input type="password" id="adminPassword" placeholder="Enter admin password" style="width: 100%; padding: 12px; border: 1px solid #1e2a45; border-radius: 8px; background-color: #0a0e1a; color: #fff;">
+    </div>
+    <div id="site-timer" style="display: none;">
+      <label class="control-label">Set Timer:</label>
+      <div class="timer-group">
+        <button class="timer-btn" onclick="setSiteTimer(30)">30 min</button>
+        <button class="timer-btn" onclick="setSiteTimer(60)">1 hour</button>
+        <button class="timer-btn" onclick="setSiteTimer(120)">2 hours</button>
+        <button class="timer-btn" onclick="setSiteTimer(300)">5 hours</button>
+        <button class="timer-btn" onclick="setSiteTimer(1440)">24 hours</button>
       </div>
-
-      <div id="loginError" style="color: #ff4d4d; font-size: 13px; margin-bottom: 15px; display: none;"></div>
-
-      <button class="btn btn-primary" style="width: 100%;" onclick="handleAdminLogin()">Access Admin Panel</button>
+      <div class="timer-display" id="site-timer-display">Timer: Off</div>
     </div>
   </div>
 
-  <div id="adminPanel" style="display: none;">
-    <div class="admin-panel">
-      <h1>⚙️ Admin Control Panel</h1>
-      <p>Manage your LyttesFX.ai platform</p>
-
-      <div id="successAlert" class="alert success"></div>
-      <div id="warningAlert" class="alert warning"></div>
-
-      <!-- Maintenance Mode -->
-      <div class="control-section">
-        <div class="control-title">🔧 Maintenance Mode</div>
-        <div class="control-description">
-          Enable maintenance mode to temporarily shut down the site. All users will see a maintenance message.
-        </div>
-        <div class="toggle-switch">
-          <label class="switch">
-            <input type="checkbox" id="maintenanceToggle" onchange="toggleMaintenance()">
-            <span class="slider"></span>
-          </label>
-          <span class="status" id="maintenanceStatus">Offline</span>
-        </div>
+  <!-- SIGNALS MAINTENANCE -->
+  <div class="section">
+    <h2>📡 Signals Page Maintenance</h2>
+    <div class="control-group">
+      <label class="control-label">Enable Signals Maintenance (only signals page)</label>
+      <div class="toggle-switch">
+        <label class="switch">
+          <input type="checkbox" id="signals-maintenance" onchange="toggleSignalsMaintenance()">
+          <span class="slider"></span>
+        </label>
+        <span class="status-text" id="signals-status">Off</span>
       </div>
-
-      <!-- Active Users -->
-      <div class="control-section">
-        <div class="control-title">👥 Active Users</div>
-        <div class="control-description">
-          Registered users on the platform
-        </div>
-        <div class="user-list" id="usersList">
-          <div style="text-align: center; color: #aaa; padding: 20px;">No users yet</div>
-        </div>
+    </div>
+    <div id="signals-timer" style="display: none;">
+      <label class="control-label">Set Timer:</label>
+      <div class="timer-group">
+        <button class="timer-btn" onclick="setSignalsTimer(30)">30 min</button>
+        <button class="timer-btn" onclick="setSignalsTimer(60)">1 hour</button>
+        <button class="timer-btn" onclick="setSignalsTimer(120)">2 hours</button>
+        <button class="timer-btn" onclick="setSignalsTimer(300)">5 hours</button>
+        <button class="timer-btn" onclick="setSignalsTimer(1440)">24 hours</button>
       </div>
+      <div class="timer-display" id="signals-timer-display">Timer: Off</div>
+    </div>
+  </div>
 
-      <!-- System Status -->
-      <div class="control-section">
-        <div class="control-title">📊 System Status</div>
-        <div style="font-size: 13px; color: #aaaaaa; line-height: 2;">
-          <div>API Status: <span style="color: #00c896;">🟢 Online</span></div>
-          <div>Database: <span style="color: #00c896;">🟢 Connected</span></div>
-          <div>Charts: <span style="color: #00c896;">🟢 Live</span></div>
-          <div>Users: <span id="userCount" style="color: #00c896;">0 registered</span></div>
-        </div>
+  <!-- SETUPS MAINTENANCE -->
+  <div class="section">
+    <h2>📊 Setups Page Maintenance</h2>
+    <div class="control-group">
+      <label class="control-label">Enable Setups Maintenance (only setups page)</label>
+      <div class="toggle-switch">
+        <label class="switch">
+          <input type="checkbox" id="setups-maintenance" onchange="toggleSetupsMaintenance()">
+          <span class="slider"></span>
+        </label>
+        <span class="status-text" id="setups-status">Off</span>
       </div>
+    </div>
+    <div id="setups-timer" style="display: none;">
+      <label class="control-label">Set Timer:</label>
+      <div class="timer-group">
+        <button class="timer-btn" onclick="setSetupsTimer(30)">30 min</button>
+        <button class="timer-btn" onclick="setSetupsTimer(60)">1 hour</button>
+        <button class="timer-btn" onclick="setSetupsTimer(120)">2 hours</button>
+        <button class="timer-btn" onclick="setSetupsTimer(300)">5 hours</button>
+        <button class="timer-btn" onclick="setSetupsTimer(1440)">24 hours</button>
+      </div>
+      <div class="timer-display" id="setups-timer-display">Timer: Off</div>
+    </div>
+  </div>
 
-      <!-- Actions -->
-      <div class="btn-group">
-        <button class="btn btn-secondary" onclick="handleLogout()">Logout</button>
-        <button class="btn btn-primary" onclick="showAlert('success', 'Settings saved successfully!')">Save Changes</button>
+  <!-- USERS -->
+  <div class="section">
+    <h2>👥 Registered Users</h2>
+    <div class="users-section">
+      <div class="users-list" id="users-list">
+        <p style="color: #aaaaaa; font-size: 13px;">Loading users...</p>
       </div>
     </div>
   </div>
+
+  <footer>
+    &copy; 2025 LyttesFX.ai — Admin Panel
+  </footer>
 </div>
 
 <script>
 window.onload = function() {
-  checkAdminStatus();
+  const admin = localStorage.getItem("lyttesfx_admin");
+  if (!admin) {
+    window.location.href = "admin-login.html";
+    return;
+  }
+  
+  loadAdminPanel();
+  setInterval(updateTimers, 1000);
+  loadUsers();
 };
 
-function checkAdminStatus() {
-  const maintenanceMode = localStorage.getItem("lyttesfx_maintenance") === "true";
-  const toggle = document.getElementById("maintenanceToggle");
-  const status = document.getElementById("maintenanceStatus");
+function loadAdminPanel() {
+  const siteMaint = localStorage.getItem("lyttesfx_maintenance") === "true";
+  const signalsMaint = localStorage.getItem("lyttesfx_signals_maintenance") === "true";
+  const setupsMaint = localStorage.getItem("lyttesfx_setups_maintenance") === "true";
 
-  if (maintenanceMode) {
-    toggle.checked = true;
-    status.textContent = "🔴 Active";
-    status.className = "status inactive";
-  } else {
-    toggle.checked = false;
-    status.textContent = "🟢 Offline";
-    status.className = "status active";
-  }
+  document.getElementById("site-maintenance").checked = siteMaint;
+  document.getElementById("signals-maintenance").checked = signalsMaint;
+  document.getElementById("setups-maintenance").checked = setupsMaint;
+
+  updateStatus();
 }
 
-function handleAdminLogin() {
-  const username = document.getElementById("adminUsername").value;
-  const password = document.getElementById("adminPassword").value;
-  const errorEl = document.getElementById("loginError");
-
-  if (username === "admin" && password === "Righteous$&@2010") {
-    localStorage.setItem("lyttesfx_admin", "true");
-    document.getElementById("loginForm").style.display = "none";
-    document.getElementById("adminPanel").style.display = "block";
-    checkAdminStatus();
-    loadUsers();
-  } else {
-    errorEl.textContent = "Invalid admin credentials";
-    errorEl.style.display = "block";
+function toggleSiteMaintenance() {
+  const isChecked = document.getElementById("site-maintenance").checked;
+  localStorage.setItem("lyttesfx_maintenance", isChecked ? "true" : "false");
+  document.getElementById("site-timer").style.display = isChecked ? "block" : "none";
+  if (!isChecked) {
+    localStorage.removeItem("lyttesfx_site_maintenance_end");
   }
+  updateStatus();
 }
 
-function toggleMaintenance() {
-  const toggle = document.getElementById("maintenanceToggle").checked;
-  const status = document.getElementById("maintenanceStatus");
+function toggleSignalsMaintenance() {
+  const isChecked = document.getElementById("signals-maintenance").checked;
+  localStorage.setItem("lyttesfx_signals_maintenance", isChecked ? "true" : "false");
+  document.getElementById("signals-timer").style.display = isChecked ? "block" : "none";
+  if (!isChecked) {
+    localStorage.removeItem("lyttesfx_signals_maintenance_end");
+  }
+  updateStatus();
+}
 
-  if (toggle) {
-    localStorage.setItem("lyttesfx_maintenance", "true");
-    status.textContent = "🔴 Active";
-    status.className = "status inactive";
-    showAlert("warning", "Maintenance mode is ON. Site is now down for users.");
-  } else {
+function toggleSetupsMaintenance() {
+  const isChecked = document.getElementById("setups-maintenance").checked;
+  localStorage.setItem("lyttesfx_setups_maintenance", isChecked ? "true" : "false");
+  document.getElementById("setups-timer").style.display = isChecked ? "block" : "none";
+  if (!isChecked) {
+    localStorage.removeItem("lyttesfx_setups_maintenance_end");
+  }
+  updateStatus();
+}
+
+function setSiteTimer(minutes) {
+  const endTime = Date.now() + minutes * 60 * 1000;
+  localStorage.setItem("lyttesfx_site_maintenance_end", endTime);
+  document.getElementById("site-maintenance").checked = true;
+  localStorage.setItem("lyttesfx_maintenance", "true");
+  document.getElementById("site-timer").style.display = "block";
+  updateStatus();
+}
+
+function setSignalsTimer(minutes) {
+  const endTime = Date.now() + minutes * 60 * 1000;
+  localStorage.setItem("lyttesfx_signals_maintenance_end", endTime);
+  document.getElementById("signals-maintenance").checked = true;
+  localStorage.setItem("lyttesfx_signals_maintenance", "true");
+  document.getElementById("signals-timer").style.display = "block";
+  updateStatus();
+}
+
+function setSetupsTimer(minutes) {
+  const endTime = Date.now() + minutes * 60 * 1000;
+  localStorage.setItem("lyttesfx_setups_maintenance_end", endTime);
+  document.getElementById("setups-maintenance").checked = true;
+  localStorage.setItem("lyttesfx_setups_maintenance", "true");
+  document.getElementById("setups-timer").style.display = "block";
+  updateStatus();
+}
+
+function updateTimers() {
+  const siteEnd = localStorage.getItem("lyttesfx_site_maintenance_end");
+  const signalsEnd = localStorage.getItem("lyttesfx_signals_maintenance_end");
+  const setupsEnd = localStorage.getItem("lyttesfx_setups_maintenance_end");
+
+  if (siteEnd && Date.now() >= parseInt(siteEnd)) {
+    localStorage.removeItem("lyttesfx_site_maintenance_end");
     localStorage.setItem("lyttesfx_maintenance", "false");
-    status.textContent = "🟢 Offline";
-    status.className = "status active";
-    showAlert("success", "Maintenance mode is OFF. Site is now live.");
+    document.getElementById("site-maintenance").checked = false;
+    document.getElementById("site-timer").style.display = "none";
   }
+
+  if (signalsEnd && Date.now() >= parseInt(signalsEnd)) {
+    localStorage.removeItem("lyttesfx_signals_maintenance_end");
+    localStorage.setItem("lyttesfx_signals_maintenance", "false");
+    document.getElementById("signals-maintenance").checked = false;
+    document.getElementById("signals-timer").style.display = "none";
+  }
+
+  if (setupsEnd && Date.now() >= parseInt(setupsEnd)) {
+    localStorage.removeItem("lyttesfx_setups_maintenance_end");
+    localStorage.setItem("lyttesfx_setups_maintenance", "false");
+    document.getElementById("setups-maintenance").checked = false;
+    document.getElementById("setups-timer").style.display = "none";
+  }
+
+  updateStatus();
+}
+
+function updateStatus() {
+  const siteMaint = localStorage.getItem("lyttesfx_maintenance") === "true";
+  const signalsMaint = localStorage.getItem("lyttesfx_signals_maintenance") === "true";
+  const setupsMaint = localStorage.getItem("lyttesfx_setups_maintenance") === "true";
+
+  document.getElementById("site-status").textContent = siteMaint ? "🔴 On" : "🟢 Off";
+  document.getElementById("site-status").className = siteMaint ? "status-text active" : "status-text";
+  document.getElementById("site-timer").style.display = siteMaint ? "block" : "none";
+
+  document.getElementById("signals-status").textContent = signalsMaint ? "🔴 On" : "🟢 Off";
+  document.getElementById("signals-status").className = signalsMaint ? "status-text active" : "status-text";
+  document.getElementById("signals-timer").style.display = signalsMaint ? "block" : "none";
+
+  document.getElementById("setups-status").textContent = setupsMaint ? "🔴 On" : "🟢 Off";
+  document.getElementById("setups-status").className = setupsMaint ? "status-text active" : "status-text";
+  document.getElementById("setups-timer").style.display = setupsMaint ? "block" : "none";
+
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const siteEnd = localStorage.getItem("lyttesfx_site_maintenance_end");
+  const signalsEnd = localStorage.getItem("lyttesfx_signals_maintenance_end");
+  const setupsEnd = localStorage.getItem("lyttesfx_setups_maintenance_end");
+
+  if (siteEnd) {
+    const remaining = Math.max(0, parseInt(siteEnd) - Date.now());
+    document.getElementById("site-timer-display").textContent = remaining > 0 ? `Ends in: ${formatTime(remaining)}` : "Timer: Off";
+  }
+
+  if (signalsEnd) {
+    const remaining = Math.max(0, parseInt(signalsEnd) - Date.now());
+    document.getElementById("signals-timer-display").textContent = remaining > 0 ? `Ends in: ${formatTime(remaining)}` : "Timer: Off";
+  }
+
+  if (setupsEnd) {
+    const remaining = Math.max(0, parseInt(setupsEnd) - Date.now());
+    document.getElementById("setups-timer-display").textContent = remaining > 0 ? `Ends in: ${formatTime(remaining)}` : "Timer: Off";
+  }
+}
+
+function formatTime(ms) {
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
 }
 
 function loadUsers() {
-  const users = localStorage.getItem("lyttesfx_users");
-  const usersList = document.getElementById("usersList");
-  const userCount = document.getElementById("userCount");
-
-  if (!users) {
-    usersList.innerHTML = '<div style="text-align: center; color: #aaa; padding: 20px;">No users yet</div>';
-    userCount.textContent = "0 registered";
-    return;
-  }
-
-  const usersObj = JSON.parse(users);
-  const userArray = Object.keys(usersObj);
+  const users = JSON.parse(localStorage.getItem("lyttesfx_users") || "{}");
+  const usersList = document.getElementById("users-list");
   
-  if (userArray.length === 0) {
-    usersList.innerHTML = '<div style="text-align: center; color: #aaa; padding: 20px;">No users yet</div>';
-    userCount.textContent = "0 registered";
+  if (Object.keys(users).length === 0) {
+    usersList.innerHTML = '<p style="color: #aaaaaa; font-size: 13px;">No registered users yet</p>';
     return;
   }
 
-  usersList.innerHTML = userArray.map(username => `
-    <div class="user-item">
-      <span>👤 ${username}</span>
-      <span class="user-badge">Active</span>
-    </div>
-  `).join("");
-
-  userCount.textContent = userArray.length + " registered";
-}
-
-function showAlert(type, message) {
-  const successAlert = document.getElementById("successAlert");
-  const warningAlert = document.getElementById("warningAlert");
-
-  if (type === "success") {
-    successAlert.textContent = message;
-    successAlert.style.display = "block";
-    warningAlert.style.display = "none";
-    setTimeout(() => successAlert.style.display = "none", 3000);
-  } else {
-    warningAlert.textContent = message;
-    warningAlert.style.display = "block";
-    successAlert.style.display = "none";
+  let html = '';
+  for (const [username, data] of Object.entries(users)) {
+    const createdAt = new Date(data.createdAt).toLocaleString();
+    html += `<div class="user-item">👤 <strong>${username}</strong> • Joined: ${createdAt}</div>`;
   }
+  usersList.innerHTML = html;
 }
 
 function handleLogout() {
   localStorage.removeItem("lyttesfx_admin");
-  window.location.href = "login.html";
-}
-
-// Check if already logged in as admin
-if (localStorage.getItem("lyttesfx_admin") === "true") {
-  document.getElementById("loginForm").style.display = "none";
-  document.getElementById("adminPanel").style.display = "block";
-  loadUsers();
+  window.location.href = "admin-login.html";
 }
 </script>
 
