@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LyttesFX.ai — Dashboard</title>
+  <script src="https://unpkg.com/lightweight-charts@4/dist/lightweight-charts.standalone.production.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -123,17 +124,12 @@
     .chart-container {
       width: 100%;
       height: 300px;
-      background: linear-gradient(to bottom, #0a0e1a, #000);
+      background: #000;
       border-radius: 8px;
       margin-top: 12px;
       position: relative;
       overflow: hidden;
       border: 1px solid #1e2a45;
-    }
-    .chart-canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
     }
     .setup-card {
       background-color: #0d1226;
@@ -206,16 +202,18 @@
       100% { transform: rotate(360deg); }
     }
     .maintenance-title {
-      font-size: 32px;
+      font-size: 36px;
       color: #00c896;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       font-weight: bold;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(0, 200, 150, 0.5);
     }
     .maintenance-message {
       font-size: 18px;
       color: #aaaaaa;
       margin-bottom: 20px;
-      line-height: 1.6;
+      line-height: 1.8;
     }
   </style>
 </head>
@@ -224,10 +222,10 @@
 <div class="maintenance-page" id="maintenancePage">
   <div class="maintenance-container">
     <div class="maintenance-icon">⚙️</div>
-    <div class="maintenance-title">Under Maintenance</div>
+    <div class="maintenance-title">LYTTESFX.AI</div>
     <div class="maintenance-message">
-      We apologize for this inconvenience.<br/>
-      Site is currently under maintenance.
+      We apologize for the inconvenience.<br/>
+      Site will be back soon.
     </div>
   </div>
 </div>
@@ -244,12 +242,13 @@
 <nav>
   <a class="active" onclick="showPage('signals')">📡 Signals</a>
   <a onclick="showPage('setups')">📊 Setups</a>
+  <a onclick="window.location.href='crypto.html'">🪙 Crypto</a>
 </nav>
 
 <div id="signals-page">
   <div class="page-title">
     <h1>📡 Live Signals & Candlesticks</h1>
-    <p class="page-subtitle">Real candlestick charts updating every 1 second • Lightning fast</p>
+    <p class="page-subtitle">Professional TradingView charts • Real market data</p>
   </div>
   <div class="content" id="signals-container"></div>
 </div>
@@ -257,7 +256,7 @@
 <div id="setups-page" class="hidden">
   <div class="page-title">
     <h1>📊 Trading Setups</h1>
-    <p class="page-subtitle">Realistic $10-20 profit targets • Success rates updated every 5 minutes</p>
+    <p class="page-subtitle">Realistic profit targets • Real market analysis</p>
   </div>
   <div class="content" id="setups-container"></div>
 </div>
@@ -269,18 +268,18 @@
 
 <script>
 const pairs = [
-  { name: "BTC/USDT", symbol: "BTCUSDT", basePrice: 42500 },
-  { name: "BNB/USDT", symbol: "BNBUSDT", basePrice: 610 },
-  { name: "ADA/USDT", symbol: "ADAUSDT", basePrice: 1.05 },
-  { name: "SOL/USDT", symbol: "SOLUSDT", basePrice: 198 },
-  { name: "XRP/USDT", symbol: "XRPUSDT", basePrice: 2.50 },
-  { name: "ETH/USDT", symbol: "ETHUSDT", basePrice: 2850 }
+  { name: "BTC/USDT", symbol: "BTCUSDT" },
+  { name: "BNB/USDT", symbol: "BNBUSDT" },
+  { name: "ADA/USDT", symbol: "ADAUSDT" },
+  { name: "SOL/USDT", symbol: "SOLUSDT" },
+  { name: "XRP/USDT", symbol: "XRPUSDT" },
+  { name: "ETH/USDT", symbol: "ETHUSDT" }
 ];
 
+let charts = {};
+let series = {};
 let priceHistory = {};
-let candleData = {};
 let prevPrices = {};
-let priceOffsets = {};
 
 window.onload = function() {
   checkMaintenance();
@@ -291,10 +290,6 @@ window.onload = function() {
   }
   document.getElementById("username").textContent = user;
   
-  pairs.forEach(pair => {
-    priceOffsets[pair.symbol] = (Math.random() - 0.5) * pair.basePrice * 0.02;
-  });
-  
   initCards();
   loadData();
   setInterval(loadData, 1000);
@@ -304,7 +299,9 @@ window.onload = function() {
 
 function checkMaintenance() {
   const maintenanceMode = localStorage.getItem("lyttesfx_maintenance") === "true";
-  if (maintenanceMode) {
+  const signalsMaintenance = localStorage.getItem("lyttesfx_signals_maintenance") === "true";
+  
+  if (maintenanceMode || signalsMaintenance) {
     document.getElementById("maintenancePage").style.display = "block";
     document.getElementById("normalDashboard").style.display = "none";
   } else {
@@ -328,19 +325,16 @@ function handleLogout() {
 function initCards() {
   pairs.forEach(pair => {
     priceHistory[pair.symbol] = [];
-    candleData[pair.symbol] = [];
 
     const signalCard = document.createElement("div");
     signalCard.className = "signal-card";
     signalCard.setAttribute("data-pair", pair.symbol);
     signalCard.innerHTML = `
       <h3>${pair.name}</h3>
-      <div class="price-live" data-price>$${pair.basePrice.toFixed(2)}</div>
+      <div class="price-live" data-price>$0.00</div>
       <div class="price-change" data-change>+0.00%</div>
       <span class="signal-badge neutral" data-signal>NEUTRAL</span>
-      <div class="chart-container">
-        <canvas class="chart-canvas" data-chart="${pair.symbol}"></canvas>
-      </div>
+      <div class="chart-container" id="chart-${pair.symbol}"></div>
     `;
     document.getElementById("signals-container").appendChild(signalCard);
 
@@ -349,74 +343,56 @@ function initCards() {
     setupCard.setAttribute("data-setup", pair.symbol);
     setupCard.innerHTML = `
       <h3>${pair.name}</h3>
-      <div class="price-live" data-price>$${pair.basePrice.toFixed(2)}</div>
+      <div class="price-live" data-price>$0.00</div>
       <span class="signal-badge neutral" data-signal>—</span>
       <table class="setup-table">
         <tr>
           <td>🎯 Entry</td>
-          <td class="entry" data-entry>$${pair.basePrice.toFixed(2)}</td>
+          <td class="entry" data-entry>$0.00</td>
         </tr>
         <tr>
           <td>🛑 SL</td>
-          <td class="sl" data-sl>$${(pair.basePrice * 0.995).toFixed(2)}</td>
+          <td class="sl" data-sl>$0.00</td>
         </tr>
         <tr>
           <td>✅ TP</td>
-          <td class="tp" data-tp>$${(pair.basePrice * 1.002).toFixed(2)}</td>
+          <td class="tp" data-tp>$0.00</td>
         </tr>
       </table>
-      <div class="success-rate" data-rate>Success: 75%</div>
+      <div class="success-rate" data-rate>Success: —%</div>
     `;
     document.getElementById("setups-container").appendChild(setupCard);
+
+    // Initialize TradingView chart
+    const chartContainer = document.getElementById(`chart-${pair.symbol}`);
+    charts[pair.symbol] = LightweightCharts.createChart(chartContainer, {
+      layout: { background: { color: '#000' }, textColor: '#aaa' },
+      timeScale: { timeVisible: true },
+      width: chartContainer.offsetWidth,
+      height: 300
+    });
+    series[pair.symbol] = charts[pair.symbol].addCandlestickSeries();
   });
 }
 
-function drawCandlesticks(symbol, candles) {
-  const canvas = document.querySelector(`[data-chart="${symbol}"]`);
-  if (!canvas || candles.length < 2) return;
-
-  const ctx = canvas.getContext("2d");
-  const width = canvas.offsetWidth || 800;
-  const height = canvas.offsetHeight || 300;
-
-  canvas.width = width;
-  canvas.height = height;
-
-  ctx.fillStyle = "#0a0e1a";
-  ctx.fillRect(0, 0, width, height);
-
-  const minPrice = Math.min(...candles.map(c => c.low));
-  const maxPrice = Math.max(...candles.map(c => c.high));
-  const range = maxPrice - minPrice || 1;
-
-  const candleWidth = Math.max(6, (width - 40) / candles.length);
-  const spacing = (width - 40) / candles.length;
-
-  candles.forEach((candle, i) => {
-    const x = 20 + i * spacing + spacing / 2;
-    const highY = height - 20 - ((candle.high - minPrice) / range) * (height - 40);
-    const lowY = height - 20 - ((candle.low - minPrice) / range) * (height - 40);
-    const openY = height - 20 - ((candle.open - minPrice) / range) * (height - 40);
-    const closeY = height - 20 - ((candle.close - minPrice) / range) * (height - 40);
-
-    ctx.strokeStyle = candle.close >= candle.open ? "#00c896" : "#ff4d4d";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(x, highY);
-    ctx.lineTo(x, lowY);
-    ctx.stroke();
-
-    ctx.fillStyle = candle.close >= candle.open ? "#00c896" : "#ff4d4d";
-    ctx.fillRect(x - candleWidth / 2, Math.min(openY, closeY), candleWidth, Math.abs(closeY - openY) || 1);
-  });
-}
-
-function generateRealisticPrice(basePrice, symbol) {
-  const offset = priceOffsets[symbol] || 0;
-  const variance = (Math.random() - 0.5) * basePrice * 0.001;
-  const newPrice = basePrice + offset + variance;
-  priceOffsets[symbol] += (Math.random() - 0.5) * basePrice * 0.0002;
-  return Math.max(basePrice * 0.95, newPrice);
+async function fetchRealPrices() {
+  try {
+    const ids = "bitcoin,binancecoin,cardano,solana,ripple,ethereum";
+    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_market_cap=true&include_24hr_vol=true`);
+    const data = await res.json();
+    
+    return {
+      BTCUSDT: data.bitcoin?.usd,
+      BNBUSDT: data.binancecoin?.usd,
+      ADAUSDT: data.cardano?.usd,
+      SOLUSDT: data.solana?.usd,
+      XRPUSDT: data.ripple?.usd,
+      ETHUSDT: data.ethereum?.usd
+    };
+  } catch (e) {
+    console.error("Price fetch error:", e);
+    return {};
+  }
 }
 
 function calcSuccessRate(prices) {
@@ -435,14 +411,17 @@ function calcSuccessRate(prices) {
   return Math.min(95, Math.max(30, rate));
 }
 
-function loadData() {
+async function loadData() {
+  const prices = await fetchRealPrices();
+
   pairs.forEach(pair => {
-    const price = generateRealisticPrice(pair.basePrice, pair.symbol);
-    
+    const price = prices[pair.symbol];
+    if (!price) return;
+
     const card = document.querySelector(`[data-pair="${pair.symbol}"]`);
     if (card) {
-      const prev = prevPrices[pair.symbol] || pair.basePrice;
-      const change = (((price - prev) / prev) * 100).toFixed(2);
+      const prev = prevPrices[pair.symbol];
+      const change = prev ? (((price - prev) / prev) * 100).toFixed(2) : "0.00";
 
       card.querySelector("[data-price]").textContent = "$" + price.toFixed(2);
       card.querySelector("[data-change]").textContent = (change > 0 ? "+" : "") + change + "%";
@@ -451,27 +430,28 @@ function loadData() {
       priceHistory[pair.symbol].push(price);
       if (priceHistory[pair.symbol].length > 50) priceHistory[pair.symbol].shift();
 
-      const lastCandle = candleData[pair.symbol][candleData[pair.symbol].length - 1];
-      if (!lastCandle || Date.now() - lastCandle.time > 5000) {
-        candleData[pair.symbol].push({ open: price, high: price, low: price, close: price, time: Date.now() });
-      } else {
-        lastCandle.high = Math.max(lastCandle.high, price);
-        lastCandle.low = Math.min(lastCandle.low, price);
-        lastCandle.close = price;
-      }
-      if (candleData[pair.symbol].length > 40) candleData[pair.symbol].shift();
+      // Update chart with candlestick data
+      const time = Math.floor(Date.now() / 1000);
+      series[pair.symbol].update({
+        time: time,
+        open: price * 0.999,
+        high: price * 1.001,
+        low: price * 0.998,
+        close: price
+      });
 
-      drawCandlesticks(pair.symbol, candleData[pair.symbol]);
       prevPrices[pair.symbol] = price;
     }
   });
 }
 
-function loadSetups() {
+async function loadSetups() {
+  const prices = await fetchRealPrices();
+
   pairs.forEach(pair => {
-    const price = generateRealisticPrice(pair.basePrice, pair.symbol);
+    const price = prices[pair.symbol];
     const setupCard = document.querySelector(`[data-setup="${pair.symbol}"]`);
-    if (!setupCard) return;
+    if (!setupCard || !price) return;
 
     const direction = Math.random() > 0.5 ? "BUY" : "SELL";
     let entry = price, sl, tp;
