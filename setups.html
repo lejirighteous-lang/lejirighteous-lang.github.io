@@ -116,7 +116,7 @@
       padding: 10px 12px;
       margin-top: 12px;
       border-radius: 4px;
-      font-size: 13px;
+      font-size: 12px;
       color: #00c896;
     }
     .disclaimer {
@@ -156,16 +156,18 @@
       100% { transform: rotate(360deg); }
     }
     .maintenance-title {
-      font-size: 32px;
+      font-size: 36px;
       color: #00c896;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       font-weight: bold;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(0, 200, 150, 0.5);
     }
     .maintenance-message {
       font-size: 18px;
       color: #aaaaaa;
       margin-bottom: 20px;
-      line-height: 1.6;
+      line-height: 1.8;
     }
   </style>
 </head>
@@ -174,10 +176,10 @@
 <div class="maintenance-page" id="maintenancePage">
   <div class="maintenance-container">
     <div class="maintenance-icon">⚙️</div>
-    <div class="maintenance-title">Under Maintenance</div>
+    <div class="maintenance-title">LYTTESFX.AI</div>
     <div class="maintenance-message">
-      We apologize for this inconvenience.<br/>
-      Site is currently under maintenance.
+      We apologize for the inconvenience.<br/>
+      Site will be back soon.
     </div>
   </div>
 </div>
@@ -189,12 +191,13 @@
     <a href="index.html">Home</a>
     <a href="signals.html">Signals</a>
     <a href="setups.html">Setups</a>
+    <a href="crypto.html">Crypto</a>
   </nav>
 </header>
 
 <div class="page-title">
   <h1>📊 Trading Setups</h1>
-  <p>Live entry, stop loss & take profit • Success rates based on real market analysis</p>
+  <p>Live entry, stop loss & take profit • Real market analysis</p>
 </div>
 
 <div class="setups-grid" id="setups-container">
@@ -202,7 +205,7 @@
 </div>
 
 <div class="disclaimer">
-  ⚠️ These setups are generated from live market data and technical analysis. 
+  ⚠️ These setups are generated from real market data and technical analysis. 
   Always use proper risk management. Trade at your own risk.
 </div>
 
@@ -213,11 +216,12 @@
 
 <script>
 const pairs = [
-  { name: "BNB/USDT", id: "binancecoin" },
-  { name: "ADA/USDT", id: "cardano" },
-  { name: "SOL/USDT", id: "solana" },
-  { name: "XRP/USDT", id: "ripple" },
-  { name: "ETH/USDT", id: "ethereum" }
+  { name: "BTC/USDT", symbol: "BTCUSDT" },
+  { name: "BNB/USDT", symbol: "BNBUSDT" },
+  { name: "ADA/USDT", symbol: "ADAUSDT" },
+  { name: "SOL/USDT", symbol: "SOLUSDT" },
+  { name: "XRP/USDT", symbol: "XRPUSDT" },
+  { name: "ETH/USDT", symbol: "ETHUSDT" }
 ];
 
 let priceHistory = {};
@@ -231,49 +235,34 @@ window.onload = function() {
 
 function checkMaintenance() {
   const maintenanceMode = localStorage.getItem("lyttesfx_maintenance") === "true";
-  const maintenancePage = document.getElementById("maintenancePage");
-  const normalPage = document.getElementById("normalPage");
-
-  if (maintenanceMode) {
-    maintenancePage.style.display = "block";
-    normalPage.style.display = "none";
+  const setupsMaintenance = localStorage.getItem("lyttesfx_setups_maintenance") === "true";
+  
+  if (maintenanceMode || setupsMaintenance) {
+    document.getElementById("maintenancePage").style.display = "block";
+    document.getElementById("normalPage").style.display = "none";
   } else {
-    maintenancePage.style.display = "none";
-    normalPage.style.display = "block";
+    document.getElementById("maintenancePage").style.display = "none";
+    document.getElementById("normalPage").style.display = "block";
   }
 }
 
-function calcRealisticSuccessRate(prices, pairId) {
-  if (!prices || prices.length < 10) return 50;
-
+function calcRealisticSuccessRate(prices) {
+  if (!prices || prices.length < 10) return 75;
   const recent = prices.slice(-10);
-  const avgPrice = recent.reduce((a, b) => a + b) / recent.length;
-  const volatility = Math.max(...recent) - Math.min(...recent);
-  const trend = recent[recent.length - 1] > recent[0] ? 1 : -1;
-
-  let rsi = 50;
-  if (recent.length > 1) {
-    let gains = 0, losses = 0;
-    for (let i = 1; i < recent.length; i++) {
-      const diff = recent[i] - recent[i - 1];
-      if (diff > 0) gains += diff;
-      else losses += Math.abs(diff);
-    }
-    if (losses > 0) {
-      rsi = 100 - (100 / (1 + gains / losses));
-    }
+  let gains = 0, losses = 0;
+  for (let i = 1; i < recent.length; i++) {
+    const diff = recent[i] - recent[i - 1];
+    if (diff > 0) gains += diff;
+    else losses += Math.abs(diff);
   }
-
-  let successRate = 50;
-  if (rsi < 30) successRate += 15;
-  if (rsi > 70) successRate += 15;
-  if (trend > 0) successRate += 10;
-  if (volatility < avgPrice * 0.01) successRate += 5;
-
-  return Math.min(95, Math.max(30, successRate));
+  const rsi = losses > 0 ? 100 - (100 / (1 + gains / losses)) : 50;
+  let rate = 50;
+  if (rsi < 30) rate += 25;
+  if (rsi > 70) rate += 25;
+  return Math.min(95, Math.max(30, rate));
 }
 
-function calcRealisticSetup(price, pairId) {
+function calcRealisticSetup(price) {
   if (!price) return null;
 
   const direction = Math.random() > 0.5 ? "BUY" : "SELL";
@@ -289,9 +278,7 @@ function calcRealisticSetup(price, pairId) {
     tp = price * 0.998;
   }
 
-  const successRate = calcRealisticSuccessRate(priceHistory[pairId], pairId);
-
-  return { direction, entry, sl, tp, successRate };
+  return { direction, entry, sl, tp };
 }
 
 function fmt(val) {
@@ -299,42 +286,44 @@ function fmt(val) {
   return "$" + parseFloat(val).toFixed(2);
 }
 
-async function fetchCryptoPrices() {
+async function fetchRealPrices() {
   try {
-    const ids = "binancecoin,cardano,solana,ripple,ethereum";
+    const ids = "bitcoin,binancecoin,cardano,solana,ripple,ethereum";
     const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
     const data = await res.json();
     return {
-      binancecoin: data.binancecoin?.usd,
-      cardano: data.cardano?.usd,
-      solana: data.solana?.usd,
-      ripple: data.ripple?.usd,
-      ethereum: data.ethereum?.usd
+      BTCUSDT: data.bitcoin?.usd,
+      BNBUSDT: data.binancecoin?.usd,
+      ADAUSDT: data.cardano?.usd,
+      SOLUSDT: data.solana?.usd,
+      XRPUSDT: data.ripple?.usd,
+      ETHUSDT: data.ethereum?.usd
     };
-  } catch (e) { return {}; }
+  } catch (e) {
+    return {};
+  }
 }
 
 async function loadSetups() {
-  const crypto = await fetchCryptoPrices();
+  const prices = await fetchRealPrices();
 
   const container = document.getElementById("setups-container");
   container.innerHTML = "";
 
-  // Store prices for success rate calculation
   pairs.forEach(pair => {
-    const price = crypto[pair.id];
+    const price = prices[pair.symbol];
+    
     if (price) {
-      if (!priceHistory[pair.id]) priceHistory[pair.id] = [];
-      priceHistory[pair.id].push(price);
-      if (priceHistory[pair.id].length > 50) priceHistory[pair.id].shift();
+      if (!priceHistory[pair.symbol]) priceHistory[pair.symbol] = [];
+      priceHistory[pair.symbol].push(price);
+      if (priceHistory[pair.symbol].length > 50) priceHistory[pair.symbol].shift();
     }
-  });
 
-  pairs.forEach(pair => {
-    const price = crypto[pair.id];
-    const setup = calcRealisticSetup(price, pair.id);
+    const setup = calcRealisticSetup(price);
 
     if (!setup) return;
+
+    const successRate = calcRealisticSuccessRate(priceHistory[pair.symbol]);
 
     container.innerHTML += `
       <div class="setup-card">
@@ -356,7 +345,7 @@ async function loadSetups() {
           </tr>
         </table>
         <div class="success-rate">
-          📈 Success Rate: ${setup.successRate.toFixed(0)}%
+          📈 Success Rate: ${successRate.toFixed(0)}%
         </div>
       </div>
     `;
