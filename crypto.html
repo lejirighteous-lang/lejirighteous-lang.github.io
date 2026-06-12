@@ -1,1 +1,300 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LyttesFX.ai — Crypto Market</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background-color: #0a0e1a;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 30px;
+      background-color: #0d1226;
+      border-bottom: 1px solid #1e2a45;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #00c896;
+    }
+    .logo span { color: #ffffff; }
+    .user-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .username {
+      color: #aaaaaa;
+      font-size: 14px;
+    }
+    .btn-logout {
+      background-color: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn-logout:hover { background-color: #cc0000; }
+    nav {
+      display: flex;
+      gap: 20px;
+      padding: 20px 30px;
+      background-color: #0d1226;
+      border-bottom: 1px solid #1e2a45;
+    }
+    nav a {
+      color: #aaaaaa;
+      text-decoration: none;
+      font-size: 14px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+    }
+    nav a.active {
+      color: #00c896;
+      border-bottom-color: #00c896;
+    }
+    .page-title {
+      text-align: center;
+      padding: 40px 20px 20px;
+    }
+    .page-title h1 {
+      font-size: 32px;
+      color: #00c896;
+    }
+    .page-subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #aaaaaa;
+      margin-top: 8px;
+    }
+    .table-container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 0 20px;
+      background-color: #0d1226;
+      border: 1px solid #1e2a45;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th {
+      background-color: #0a0e1a;
+      padding: 15px;
+      text-align: left;
+      font-weight: bold;
+      color: #00c896;
+      border-bottom: 1px solid #1e2a45;
+    }
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #1e2a45;
+      color: #aaaaaa;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    tr:hover {
+      background-color: #0a0e1a;
+    }
+    .rank { color: #00c896; font-weight: bold; }
+    .name { color: #ffffff; font-weight: bold; }
+    .symbol { color: #888; font-size: 12px; }
+    .price { color: #00c896; font-weight: bold; }
+    .change.up { color: #00c896; }
+    .change.down { color: #ff4d4d; }
+    .market-cap { color: #aaaaaa; }
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #444;
+      font-size: 12px;
+      margin-top: 40px;
+    }
+    .maintenance-page {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a0e1a 0%, #0d1226 100%);
+    }
+    .maintenance-container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+    .maintenance-icon {
+      font-size: 80px;
+      margin-bottom: 30px;
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .maintenance-title {
+      font-size: 36px;
+      color: #00c896;
+      margin-bottom: 20px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(0, 200, 150, 0.5);
+    }
+    .maintenance-message {
+      font-size: 18px;
+      color: #aaaaaa;
+      margin-bottom: 20px;
+      line-height: 1.8;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #aaaaaa;
+    }
+  </style>
+</head>
+<body>
+
+<div class="maintenance-page" id="maintenancePage">
+  <div class="maintenance-container">
+    <div class="maintenance-icon">⚙️</div>
+    <div class="maintenance-title">LYTTESFX.AI</div>
+    <div class="maintenance-message">
+      We apologize for the inconvenience.<br/>
+      Site will be back soon.
+    </div>
+  </div>
+</div>
+
+<div id="normalPage">
+<header>
+  <div class="logo">Lyttes<span>FX.ai</span></div>
+  <div class="user-section">
+    <span class="username">Welcome, <b id="username"></b></span>
+    <button class="btn-logout" onclick="handleLogout()">Logout</button>
+  </div>
+</header>
+
+<nav>
+  <a onclick="window.location.href='dashboard.html'">📊 Dashboard</a>
+  <a onclick="window.location.href='signals.html'">📡 Signals</a>
+  <a onclick="window.location.href='setups.html'">📈 Setups</a>
+  <a class="active">🪙 Crypto</a>
+</nav>
+
+<div class="page-title">
+  <h1>🪙 Cryptocurrency Market</h1>
+  <p class="page-subtitle">Top 20 cryptocurrencies • Real-time prices & market cap</p>
+</div>
+
+<div class="table-container">
+  <table id="crypto-table">
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Name</th>
+        <th>Price (USD)</th>
+        <th>24h Change</th>
+        <th>Market Cap (USD)</th>
+      </tr>
+    </thead>
+    <tbody id="crypto-body">
+      <tr>
+        <td colspan="5" class="loading">Loading real-time crypto data...</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<footer>
+  &copy; 2025 LyttesFX.ai — Real Market Data. Real Prices.
+</footer>
+</div>
+
+<script>
+window.onload = function() {
+  checkMaintenance();
+  const user = localStorage.getItem("lyttesfx_user");
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+  document.getElementById("username").textContent = user;
+  
+  loadCryptoData();
+  setInterval(loadCryptoData, 5000);
+  setInterval(checkMaintenance, 2000);
+};
+
+function checkMaintenance() {
+  const maintenanceMode = localStorage.getItem("lyttesfx_maintenance") === "true";
+  
+  if (maintenanceMode) {
+    document.getElementById("maintenancePage").style.display = "block";
+    document.getElementById("normalPage").style.display = "none";
+  } else {
+    document.getElementById("maintenancePage").style.display = "none";
+    document.getElementById("normalPage").style.display = "block";
+  }
+}
+
+function handleLogout() {
+  localStorage.removeItem("lyttesfx_user");
+  window.location.href = "login.html";
+}
+
+async function loadCryptoData() {
+  try {
+    const res = await fetch(
+      `https://api.coingecko.com/api/v3/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1&sparkline=false`
+    );
+    const data = await res.json();
+    
+    const tbody = document.getElementById("crypto-body");
+    tbody.innerHTML = "";
+
+    data.forEach((crypto, index) => {
+      const row = document.createElement("tr");
+      const price = crypto.current_price || 0;
+      const change = crypto.price_change_percentage_24h || 0;
+      const marketCap = crypto.market_cap || 0;
+      
+      const changeClass = change >= 0 ? "up" : "down";
+      const changeSign = change >= 0 ? "+" : "";
+
+      row.innerHTML = `
+        <td class="rank">#${index + 1}</td>
+        <td>
+          <div class="name">${crypto.name}</div>
+          <div class="symbol">${crypto.symbol.toUpperCase()}</div>
+        </td>
+        <td class="price">$${price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+        <td class="change ${changeClass}">${changeSign}${change.toFixed(2)}%</td>
+        <td class="market-cap">$${marketCap ? (marketCap / 1000000000).toFixed(2) + 'B' : 'N/A'}</td>
+      `;
+      
+      tbody.appendChild(row);
+    });
+  } catch (e) {
+    console.error("Error loading crypto data:", e);
+    const tbody = document.getElementById("crypto-body");
+    tbody.innerHTML = `<tr><td colspan="5" class="loading">Error loading data. Please refresh.</td></tr>`;
+  }
+}
+</script>
+
+</body>
+</html>
