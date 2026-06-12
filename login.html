@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>LyttesFX.ai — Login</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -22,6 +25,10 @@
       min-height: 100vh;
       background: linear-gradient(135deg, #0a0e1a 0%, #0d1226 100%);
       width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
     }
     .maintenance-container {
       max-width: 500px;
@@ -200,22 +207,51 @@
 </div>
 
 <script>
+// PREVENT CACHING
+if ('caches' in window) {
+  caches.keys().then(function(cacheNames) {
+    cacheNames.forEach(function(cacheName) {
+      caches.delete(cacheName);
+    });
+  });
+}
+
 window.onload = function() {
-  checkMaintenance();
-  setInterval(checkMaintenance, 2000);
+  // CHECK MAINTENANCE IMMEDIATELY ON PAGE LOAD
+  checkMaintenanceNow();
+  
+  // CHECK EVERY 500ms TO CATCH CHANGES
+  setInterval(checkMaintenanceNow, 500);
 };
 
-function checkMaintenance() {
-  const maintenanceMode = localStorage.getItem("lyttesfx_maintenance") === "true";
+function checkMaintenanceNow() {
+  // Force refresh from localStorage (not cached)
+  const maintenanceMode = localStorage.getItem("lyttesfx_maintenance");
+  const isMaintenance = maintenanceMode === "true";
+  
   const maintenancePage = document.getElementById("maintenancePage");
   const loginContainer = document.getElementById("loginContainer");
 
-  if (maintenanceMode) {
-    maintenancePage.style.display = "block";
+  if (isMaintenance) {
+    maintenancePage.style.display = "flex";
     loginContainer.style.display = "none";
+    // Disable all form inputs
+    document.querySelectorAll("input").forEach(input => {
+      input.disabled = true;
+    });
+    document.querySelectorAll("button").forEach(button => {
+      button.disabled = true;
+    });
   } else {
     maintenancePage.style.display = "none";
     loginContainer.style.display = "block";
+    // Enable all form inputs
+    document.querySelectorAll("input").forEach(input => {
+      input.disabled = false;
+    });
+    document.querySelectorAll("button").forEach(button => {
+      button.disabled = false;
+    });
   }
 }
 
@@ -233,6 +269,12 @@ function switchTab(tab) {
 }
 
 function handleLogin() {
+  const isMaintenance = localStorage.getItem("lyttesfx_maintenance") === "true";
+  if (isMaintenance) {
+    document.getElementById("login-error").textContent = "Site is under maintenance";
+    return;
+  }
+
   const username = document.getElementById("login-username").value.trim();
   const password = document.getElementById("login-password").value.trim();
   const errorEl = document.getElementById("login-error");
@@ -252,6 +294,12 @@ function handleLogin() {
 }
 
 function handleSignup() {
+  const isMaintenance = localStorage.getItem("lyttesfx_maintenance") === "true";
+  if (isMaintenance) {
+    document.getElementById("signup-error").textContent = "Site is under maintenance";
+    return;
+  }
+
   const username = document.getElementById("signup-username").value.trim();
   const password = document.getElementById("signup-password").value.trim();
   const confirm = document.getElementById("signup-confirm").value.trim();
