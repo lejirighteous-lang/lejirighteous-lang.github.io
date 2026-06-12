@@ -3,16 +3,105 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>LyttesFX.ai</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#00c896">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <script>
-    window.location.replace("login.html");
-  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: linear-gradient(135deg, #0a0e1a 0%, #0d1226 100%);
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .maintenance-page {
+      display: none;
+      text-align: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0a0e1a 0%, #0d1226 100%);
+      width: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 9999;
+    }
+    .maintenance-container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+    .maintenance-icon {
+      font-size: 80px;
+      margin-bottom: 30px;
+      animation: spin 2s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .maintenance-title {
+      font-size: 36px;
+      color: #00c896;
+      margin-bottom: 20px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(0, 200, 150, 0.5);
+    }
+    .maintenance-message {
+      font-size: 18px;
+      color: #aaaaaa;
+      margin-bottom: 20px;
+      line-height: 1.8;
+    }
+  </style>
 </head>
 <body>
-  Redirecting to login...
+
+<div class="maintenance-page" id="maintenancePage">
+  <div class="maintenance-container">
+    <div class="maintenance-icon">⚙️</div>
+    <div class="maintenance-title">LYTTESFX.AI</div>
+    <div class="maintenance-message">
+      We apologize for the inconvenience.<br/>
+      Site will be back soon.
+    </div>
+  </div>
+</div>
+
+<script>
+// Check for .maintenance file
+async function checkMaintenance() {
+  try {
+    const response = await fetch('.maintenance', { method: 'HEAD' });
+    return response.ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+window.onload = async function() {
+  const isMaintenance = await checkMaintenance();
+  
+  if (isMaintenance) {
+    document.getElementById("maintenancePage").style.display = "flex";
+  } else {
+    window.location.replace("login.html");
+  }
+  
+  // Check every 2 seconds for maintenance changes
+  setInterval(async function() {
+    const maintenance = await checkMaintenance();
+    if (maintenance) {
+      document.getElementById("maintenancePage").style.display = "flex";
+    }
+  }, 2000);
+};
+</script>
+
 </body>
 </html>
