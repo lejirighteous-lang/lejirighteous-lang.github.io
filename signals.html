@@ -3,151 +3,41 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LyttesFX.ai — Live Signals</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <script src="https://unpkg.com/lightweight-charts@4/dist/lightweight-charts.standalone.production.js"></script>
+  <title>LyttesFX.ai — Live Signals</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background-color: #0a0e1a;
-      color: #ffffff;
-      font-family: Arial, sans-serif;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 30px;
-      background-color: #0d1226;
-      border-bottom: 1px solid #1e2a45;
-    }
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-      color: #00c896;
-    }
+    body { background-color: #0a0e1a; color: #ffffff; font-family: Arial, sans-serif; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; background-color: #0d1226; border-bottom: 1px solid #1e2a45; }
+    .logo { font-size: 24px; font-weight: bold; color: #00c896; }
     .logo span { color: #ffffff; }
-    nav a {
-      color: #aaaaaa;
-      text-decoration: none;
-      margin-left: 20px;
-      font-size: 14px;
-    }
+    nav a { color: #aaaaaa; text-decoration: none; margin-left: 20px; font-size: 14px; }
     nav a:hover { color: #00c896; }
-    .page-title {
-      text-align: center;
-      padding: 40px 20px 20px;
-    }
-    .page-title h1 {
-      font-size: 32px;
-      color: #00c896;
-    }
-    .page-subtitle {
-      text-align: center;
-      font-size: 14px;
-      color: #aaaaaa;
-      margin-top: 8px;
-    }
-    .signals-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 30px;
-      max-width: 900px;
-      margin: 30px auto;
-      padding: 0 20px;
-    }
-    .signal-card {
-      background-color: #0d1226;
-      border: 1px solid #1e2a45;
-      border-radius: 12px;
-      padding: 20px;
-    }
-    .signal-card h3 {
-      font-size: 20px;
-      color: #ffffff;
-      margin-bottom: 8px;
-    }
-    .price-live {
-      font-size: 24px;
-      font-weight: bold;
-      color: #00c896;
-      margin-bottom: 8px;
-    }
-    .price-change {
-      font-size: 13px;
-      margin-bottom: 10px;
-    }
+    .page-title { text-align: center; padding: 40px 20px 20px; }
+    .page-title h1 { font-size: 32px; color: #00c896; }
+    .page-subtitle { text-align: center; font-size: 14px; color: #aaaaaa; margin-top: 8px; }
+    .signals-grid { display: grid; grid-template-columns: 1fr; gap: 30px; max-width: 900px; margin: 30px auto; padding: 0 20px; }
+    .signal-card { background-color: #0d1226; border: 1px solid #1e2a45; border-radius: 12px; padding: 20px; }
+    .signal-card h3 { font-size: 20px; color: #ffffff; margin-bottom: 8px; }
+    .price-live { font-size: 24px; font-weight: bold; color: #00c896; margin-bottom: 8px; }
+    .price-change { font-size: 13px; margin-bottom: 10px; }
     .price-change.up { color: #00c896; }
     .price-change.down { color: #ff4d4d; }
-    .signal-badge {
-      display: inline-block;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-weight: bold;
-      font-size: 13px;
-      margin-bottom: 12px;
-    }
+    .signal-badge { display: inline-block; padding: 6px 16px; border-radius: 20px; font-weight: bold; font-size: 13px; margin-bottom: 12px; }
     .buy { background-color: #00c896; color: #000; }
     .sell { background-color: #ff4d4d; color: #fff; }
     .neutral { background-color: #444; color: #fff; }
-    .signal-info {
-      font-size: 13px;
-      color: #aaaaaa;
-      line-height: 1.8;
-      margin-bottom: 12px;
-    }
+    .signal-info { font-size: 13px; color: #aaaaaa; line-height: 1.8; margin-bottom: 12px; }
     .signal-info b { color: #ffffff; }
-    .chart-container {
-      width: 100%;
-      height: 300px;
-      background: #000;
-      border-radius: 8px;
-      margin-top: 12px;
-      position: relative;
-      overflow: hidden;
-      border: 1px solid #1e2a45;
-    }
-    footer {
-      text-align: center;
-      padding: 30px;
-      color: #444;
-      font-size: 12px;
-      margin-top: 40px;
-    }
-    .maintenance-page {
-      display: none;
-      text-align: center;
-      padding: 40px 20px;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #0a0e1a 0%, #0d1226 100%);
-    }
-    .maintenance-container {
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 40px;
-    }
-    .maintenance-icon {
-      font-size: 80px;
-      margin-bottom: 30px;
-      animation: spin 2s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .maintenance-title {
-      font-size: 36px;
-      color: #00c896;
-      margin-bottom: 20px;
-      font-weight: bold;
-      letter-spacing: 3px;
-      text-shadow: 0 0 10px rgba(0, 200, 150, 0.5);
-    }
-    .maintenance-message {
-      font-size: 18px;
-      color: #aaaaaa;
-      margin-bottom: 20px;
-      line-height: 1.8;
-    }
+    .chart-container { width: 100%; height: 300px; background: #000; border-radius: 8px; margin-top: 12px; border: 1px solid #1e2a45; }
+    footer { text-align: center; padding: 30px; color: #444; font-size: 12px; margin-top: 40px; }
+    .maintenance-page { display: none; text-align: center; padding: 40px 20px; min-height: 100vh; background: linear-gradient(135deg, #0a0e1a 0%, #0d1226 100%); position: fixed; top: 0; left: 0; z-index: 9999; }
+    .maintenance-container { max-width: 500px; margin: 0 auto; padding: 40px; }
+    .maintenance-icon { font-size: 80px; margin-bottom: 30px; animation: spin 2s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .maintenance-title { font-size: 36px; color: #00c896; margin-bottom: 20px; font-weight: bold; letter-spacing: 3px; text-shadow: 0 0 10px rgba(0, 200, 150, 0.5); }
+    .maintenance-message { font-size: 18px; color: #aaaaaa; margin-bottom: 20px; line-height: 1.8; }
   </style>
 </head>
 <body>
@@ -188,12 +78,12 @@
 
 <script>
 const pairs = [
-  { name: "BTC/USDT", symbol: "BTCUSDT", id: "bitcoin" },
-  { name: "BNB/USDT", symbol: "BNBUSDT", id: "binancecoin" },
-  { name: "ADA/USDT", symbol: "ADAUSDT", id: "cardano" },
-  { name: "SOL/USDT", symbol: "SOLUSDT", id: "solana" },
-  { name: "XRP/USDT", symbol: "XRPUSDT", id: "ripple" },
-  { name: "ETH/USDT", symbol: "ETHUSDT", id: "ethereum" }
+  { name: "BTC/USDT", symbol: "BTCUSDT" },
+  { name: "BNB/USDT", symbol: "BNBUSDT" },
+  { name: "ADA/USDT", symbol: "ADAUSDT" },
+  { name: "SOL/USDT", symbol: "SOLUSDT" },
+  { name: "XRP/USDT", symbol: "XRPUSDT" },
+  { name: "ETH/USDT", symbol: "ETHUSDT" }
 ];
 
 let charts = {};
@@ -202,26 +92,37 @@ let priceHistory = {};
 let prevPrices = {};
 let rsiValues = {};
 
-window.onload = function() {
-  checkMaintenance();
+async function checkMaintenance() {
+  try {
+    const response = await fetch('.maintenance', { method: 'HEAD' });
+    return response.ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+window.onload = async function() {
+  const isMaintenance = await checkMaintenance();
+  if (isMaintenance) {
+    document.getElementById("maintenancePage").style.display = "flex";
+    document.getElementById("normalPage").style.display = "none";
+    return;
+  }
+  
   initCards();
   loadSignals();
   setInterval(loadSignals, 1000);
-  setInterval(checkMaintenance, 2000);
+  setInterval(async function() {
+    const maintenance = await checkMaintenance();
+    if (maintenance) {
+      document.getElementById("maintenancePage").style.display = "flex";
+      document.getElementById("normalPage").style.display = "none";
+    } else {
+      document.getElementById("maintenancePage").style.display = "none";
+      document.getElementById("normalPage").style.display = "block";
+    }
+  }, 500);
 };
-
-function checkMaintenance() {
-  const maintenanceMode = localStorage.getItem("lyttesfx_maintenance") === "true";
-  const signalsMaintenance = localStorage.getItem("lyttesfx_signals_maintenance") === "true";
-  
-  if (maintenanceMode || signalsMaintenance) {
-    document.getElementById("maintenancePage").style.display = "block";
-    document.getElementById("normalPage").style.display = "none";
-  } else {
-    document.getElementById("maintenancePage").style.display = "none";
-    document.getElementById("normalPage").style.display = "block";
-  }
-}
 
 function initCards() {
   pairs.forEach(pair => {
@@ -240,7 +141,6 @@ function initCards() {
     `;
     document.getElementById("signals-container").appendChild(signalCard);
 
-    // Initialize TradingView chart
     const chartContainer = document.getElementById(`chart-${pair.symbol}`);
     charts[pair.symbol] = LightweightCharts.createChart(chartContainer, {
       layout: { background: { color: '#000' }, textColor: '#aaa' },
@@ -333,7 +233,6 @@ async function loadSignals() {
       <b>RSI:</b> ${rsiValues[pair.symbol] ? rsiValues[pair.symbol].toFixed(1) : "—"} | <b>Signal:</b> ${signal}
     `;
 
-    // Update chart
     const time = Math.floor(Date.now() / 1000);
     series[pair.symbol].update({
       time: time,
