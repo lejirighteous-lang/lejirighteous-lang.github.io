@@ -3,191 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <title>LyttesFX.ai — Admin Panel</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background-color: #0a0e1a;
-      color: #ffffff;
-      font-family: Arial, sans-serif;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 30px;
-      background-color: #0d1226;
-      border-bottom: 1px solid #1e2a45;
-    }
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-      color: #00c896;
-    }
+    body { background-color: #0a0e1a; color: #ffffff; font-family: Arial, sans-serif; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; background-color: #0d1226; border-bottom: 1px solid #1e2a45; }
+    .logo { font-size: 24px; font-weight: bold; color: #00c896; }
     .logo span { color: #ffffff; }
-    .btn-logout {
-      background-color: #ff4d4d;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-    }
+    .btn-logout { background-color: #ff4d4d; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
     .btn-logout:hover { background-color: #cc0000; }
-    .container {
-      max-width: 900px;
-      margin: 30px auto;
-      padding: 0 20px;
-    }
-    .page-title {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    .page-title h1 {
-      font-size: 32px;
-      color: #00c896;
-      margin-bottom: 10px;
-    }
-    .page-subtitle {
-      color: #aaaaaa;
-      font-size: 14px;
-    }
-    .section {
-      background-color: #0d1226;
-      border: 1px solid #1e2a45;
-      border-radius: 12px;
-      padding: 30px;
-      margin-bottom: 30px;
-    }
-    .section h2 {
-      font-size: 20px;
-      color: #00c896;
-      margin-bottom: 20px;
-      border-bottom: 1px solid #1e2a45;
-      padding-bottom: 10px;
-    }
-    .control-group {
-      margin-bottom: 25px;
-    }
-    .control-label {
-      color: #aaaaaa;
-      font-size: 14px;
-      margin-bottom: 10px;
-      display: block;
-    }
-    .toggle-switch {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 60px;
-      height: 34px;
-    }
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #444;
-      transition: 0.4s;
-      border-radius: 34px;
-    }
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 26px;
-      width: 26px;
-      left: 4px;
-      bottom: 4px;
-      background-color: white;
-      transition: 0.4s;
-      border-radius: 50%;
-    }
-    input:checked + .slider {
-      background-color: #00c896;
-    }
-    input:checked + .slider:before {
-      transform: translateX(26px);
-    }
-    .status-text {
-      color: #aaaaaa;
-      font-size: 13px;
-    }
-    .status-text.active {
-      color: #00c896;
-      font-weight: bold;
-    }
-    .timer-group {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .timer-btn {
-      padding: 10px;
-      background-color: #0a0e1a;
-      border: 1px solid #1e2a45;
-      color: #aaaaaa;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      transition: 0.3s;
-    }
-    .timer-btn:hover {
-      border-color: #00c896;
-      color: #00c896;
-    }
-    .timer-btn.active {
-      background-color: #00c896;
-      color: #000;
-      border-color: #00c896;
-    }
-    .timer-display {
-      margin-top: 15px;
-      padding: 15px;
-      background-color: #0a0e1a;
-      border-radius: 6px;
-      text-align: center;
-      color: #00c896;
-      font-weight: bold;
-    }
-    .users-section {
-      margin-top: 20px;
-    }
-    .users-list {
-      background-color: #0a0e1a;
-      border-radius: 6px;
-      padding: 15px;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-    .user-item {
-      padding: 10px;
-      border-bottom: 1px solid #1e2a45;
-      font-size: 13px;
-      color: #aaaaaa;
-    }
-    .user-item:last-child {
-      border-bottom: none;
-    }
-    footer {
-      text-align: center;
-      padding: 30px;
-      color: #444;
-      font-size: 12px;
-      margin-top: 40px;
-    }
+    .container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+    .page-title { text-align: center; margin-bottom: 40px; }
+    .page-title h1 { font-size: 32px; color: #00c896; margin-bottom: 10px; }
+    .page-subtitle { color: #aaaaaa; font-size: 14px; }
+    .section { background-color: #0d1226; border: 1px solid #1e2a45; border-radius: 12px; padding: 30px; margin-bottom: 30px; }
+    .section h2 { font-size: 20px; color: #00c896; margin-bottom: 20px; border-bottom: 1px solid #1e2a45; padding-bottom: 10px; }
+    .control-group { margin-bottom: 25px; }
+    .control-label { color: #aaaaaa; font-size: 14px; margin-bottom: 10px; display: block; }
+    .toggle-switch { display: flex; align-items: center; gap: 15px; }
+    .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #444; transition: 0.4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: 0.4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #00c896; }
+    input:checked + .slider:before { transform: translateX(26px); }
+    .status-text { color: #aaaaaa; font-size: 13px; }
+    .status-text.active { color: #00c896; font-weight: bold; }
+    .timer-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
+    .timer-btn { padding: 10px; background-color: #0a0e1a; border: 1px solid #1e2a45; color: #aaaaaa; border-radius: 6px; cursor: pointer; font-size: 13px; transition: 0.3s; }
+    .timer-btn:hover { border-color: #00c896; color: #00c896; }
+    .timer-btn.active { background-color: #00c896; color: #000; border-color: #00c896; }
+    .timer-display { margin-top: 15px; padding: 15px; background-color: #0a0e1a; border-radius: 6px; text-align: center; color: #00c896; font-weight: bold; }
+    .users-section { margin-top: 20px; }
+    .users-list { background-color: #0a0e1a; border-radius: 6px; padding: 15px; max-height: 300px; overflow-y: auto; }
+    .user-item { padding: 10px; border-bottom: 1px solid #1e2a45; font-size: 13px; color: #aaaaaa; }
+    .user-item:last-child { border-bottom: none; }
+    footer { text-align: center; padding: 30px; color: #444; font-size: 12px; margin-top: 40px; }
   </style>
 </head>
 <body>
@@ -203,7 +55,6 @@
     <p class="page-subtitle">Manage site maintenance and system settings</p>
   </div>
 
-  <!-- SITE MAINTENANCE -->
   <div class="section">
     <h2>🌐 Site Maintenance</h2>
     <div class="control-group">
@@ -229,7 +80,6 @@
     </div>
   </div>
 
-  <!-- SIGNALS MAINTENANCE -->
   <div class="section">
     <h2>📡 Signals Page Maintenance</h2>
     <div class="control-group">
@@ -255,7 +105,6 @@
     </div>
   </div>
 
-  <!-- SETUPS MAINTENANCE -->
   <div class="section">
     <h2>📊 Setups Page Maintenance</h2>
     <div class="control-group">
@@ -281,7 +130,6 @@
     </div>
   </div>
 
-  <!-- USERS -->
   <div class="section">
     <h2>👥 Registered Users</h2>
     <div class="users-section">
@@ -329,6 +177,7 @@ function toggleSiteMaintenance() {
     localStorage.removeItem("lyttesfx_site_maintenance_end");
   }
   updateStatus();
+  createOrDeleteMaintenanceFile(isChecked);
 }
 
 function toggleSignalsMaintenance() {
@@ -358,6 +207,7 @@ function setSiteTimer(minutes) {
   localStorage.setItem("lyttesfx_maintenance", "true");
   document.getElementById("site-timer").style.display = "block";
   updateStatus();
+  createOrDeleteMaintenanceFile(true);
 }
 
 function setSignalsTimer(minutes) {
@@ -388,6 +238,7 @@ function updateTimers() {
     localStorage.setItem("lyttesfx_maintenance", "false");
     document.getElementById("site-maintenance").checked = false;
     document.getElementById("site-timer").style.display = "none";
+    createOrDeleteMaintenanceFile(false);
   }
 
   if (signalsEnd && Date.now() >= parseInt(signalsEnd)) {
@@ -479,6 +330,13 @@ function loadUsers() {
 function handleLogout() {
   localStorage.removeItem("lyttesfx_admin");
   window.location.href = "admin-login.html";
+}
+
+function createOrDeleteMaintenanceFile(shouldCreate) {
+  // Note: This function calls GitHub API to create/delete .maintenance file
+  // You'll need to implement this separately with GitHub API
+  // For now, the .maintenance file is managed manually on GitHub
+  console.log(shouldCreate ? "Maintenance ON - Delete .maintenance file manually from GitHub" : "Maintenance OFF - Create .maintenance file manually on GitHub");
 }
 </script>
 
