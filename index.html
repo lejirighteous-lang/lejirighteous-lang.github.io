@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
   <title>LyttesFX.ai</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -74,33 +72,23 @@
 </div>
 
 <script>
-// Check for .maintenance file
-async function checkMaintenance() {
-  try {
-    const response = await fetch('.maintenance', { method: 'HEAD' });
-    return response.ok;
-  } catch (e) {
-    return false;
-  }
-}
+window.onload = function() {
+  checkMaintenance();
+  // Check every 500ms for maintenance changes
+  setInterval(checkMaintenance, 500);
+};
 
-window.onload = async function() {
-  const isMaintenance = await checkMaintenance();
-  
+function checkMaintenance() {
+  const isMaintenance = localStorage.getItem("lyttesfx_maintenance") === "true";
+  const maintenancePage = document.getElementById("maintenancePage");
+
   if (isMaintenance) {
-    document.getElementById("maintenancePage").style.display = "flex";
+    maintenancePage.style.display = "flex";
   } else {
+    maintenancePage.style.display = "none";
     window.location.replace("login.html");
   }
-  
-  // Check every 2 seconds for maintenance changes
-  setInterval(async function() {
-    const maintenance = await checkMaintenance();
-    if (maintenance) {
-      document.getElementById("maintenancePage").style.display = "flex";
-    }
-  }, 2000);
-};
+}
 </script>
 
 </body>
